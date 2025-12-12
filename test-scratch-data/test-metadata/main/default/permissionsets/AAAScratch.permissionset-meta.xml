@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <applicationVisibilities>
         <application>standard__AllTabSet</application>
@@ -9,27 +9,27 @@
         <visible>true</visible>
     </applicationVisibilities>
     <classAccesses>
-        <apexClass>FieldValidationUtil</apexClass>
+        <apexClass>LRES_FieldValidationUtil</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>FieldValidationUtilTest</apexClass>
+        <apexClass>LRES_FieldValidationUtilTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>KanbanExplorerCardRecordsController</apexClass>
+        <apexClass>LRES_KanbanCardRecordsController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>KanbanExplorerCardRecordsCtrlTest</apexClass>
+        <apexClass>LRES_KanbanCardRecordsCtrlTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>KanbanExplorerParentRecordsController</apexClass>
+        <apexClass>LRES_KanbanParentRecordsController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
-        <apexClass>KanbanExplorerParentRecordsCtrlTest</apexClass>
+        <apexClass>LRES_KanbanParentRecordsCtrlTest</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <fieldPermissions>
@@ -186,6 +186,10 @@
     </tabSettings>
     <tabSettings>
         <tab>Contact_Cases_Viewer</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>Project_Tasks_Viewer</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
