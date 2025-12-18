@@ -11,37 +11,3 @@ package.xml
 
 # LWC Jest tests
 **/__tests__/**
-
-# ------------------------------------------------------------
-# New rules to exclude everything except:
-#   - Apex classes
-#   - Lightning web components
-#   - Objects (and their layouts)
-#   - Page layouts
-#   - Custom metadata
-# ------------------------------------------------------------
-
-# Ignore ALL source under force-app
-force-app/**
-
-# ------------------------------------------------------------
-# Re-include allowed metadata
-# ------------------------------------------------------------
-
-# Apex Classes
-!force-app/main/default/classes/**
-!force-app/main/default/classes/*.cls
-!force-app/main/default/classes/*.cls-meta.xml
-
-# Lightning Web Components
-!force-app/main/default/lwc/**
-
-# Objects (includes fields, validation rules, record types, layouts, etc.)
-!force-app/main/default/objects/**
-
-# Page Layouts (exists either at /layouts or under objects/**/layouts)
-!force-app/main/default/layouts/**
-!force-app/main/default/objects/**/layouts/**
-
-# Custom Metadata Types
-!force-app/main/default/customMetadata/**
