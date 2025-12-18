@@ -1,0 +1,86 @@
+:host {
+  display: contents;
+}
+
+.hierarchy-card {
+  background: #ffffff;
+  border-radius: 0.5rem;
+  border: 1px solid var(--lwc-borderColor, #e5e5e5);
+  padding: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  cursor: grab;
+  transition:
+    transform 0.1s ease,
+    box-shadow 0.1s ease;
+}
+
+.hierarchy-card:focus,
+.hierarchy-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  outline: none;
+}
+
+.hierarchy-card.is-dragging {
+  opacity: 0.6;
+  cursor: grabbing;
+}
+
+.hierarchy-card_title {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  word-break: break-word;
+}
+
+.hierarchy-card_title-link {
+  flex: 1 1 auto;
+  color: var(--lwc-brandTextLink, #0b5cab);
+  text-decoration: none;
+}
+
+.hierarchy-card_title-link:focus,
+.hierarchy-card_title-link:hover {
+  text-decoration: underline;
+}
+
+.hierarchy-card_external-link {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.125rem;
+}
+
+.hierarchy-card_external-icon {
+  --slds-c-icon-color-foreground-default: var(
+    --slds-g-color-neutral-base-50,
+    #706e6b
+  );
+}
+
+.hierarchy-card_details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.hierarchy-card_field-value {
+  color: var(--lwc-colorTextDefault, #080707);
+  white-space: pre-line;
+}
+
+.hierarchy-field_icon {
+  --slds-c-icon-color-foreground: var(--lwc-colorTextDefault, #080707);
+  align-self: flex-start;
+  margin-top: 0.1rem;
+}
+
+.hierarchy-field_emoji {
+  font-size: 0.75rem;
+  line-height: 1;
+  align-self: flex-start;
+  margin-top: 0.1rem;
+  padding-top: 2px;
+}
