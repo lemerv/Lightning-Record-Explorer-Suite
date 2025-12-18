@@ -1,12 +1,47 @@
-# List files or directories below to ignore them when running force:source:push, force:source:pull, and force:source:status
-# More information: https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_exclude_source.htm
-#
+# ------------------------------------------------------------
+# Existing rules
+# ------------------------------------------------------------
 
+# Ignore package.xml
 package.xml
 
 # LWC configuration files
 **/jsconfig.json
 **/.eslintrc.json
 
-# LWC Jest
+# LWC Jest tests
 **/__tests__/**
+
+# ------------------------------------------------------------
+# New rules to exclude everything except:
+#   - Apex classes
+#   - Lightning web components
+#   - Objects (and their layouts)
+#   - Page layouts
+#   - Custom metadata
+# ------------------------------------------------------------
+
+# Ignore ALL source under force-app
+force-app/**
+
+# ------------------------------------------------------------
+# Re-include allowed metadata
+# ------------------------------------------------------------
+
+# Apex Classes
+!force-app/main/default/classes/**
+!force-app/main/default/classes/*.cls
+!force-app/main/default/classes/*.cls-meta.xml
+
+# Lightning Web Components
+!force-app/main/default/lwc/**
+
+# Objects (includes fields, validation rules, record types, layouts, etc.)
+!force-app/main/default/objects/**
+
+# Page Layouts (exists either at /layouts or under objects/**/layouts)
+!force-app/main/default/layouts/**
+!force-app/main/default/objects/**/layouts/**
+
+# Custom Metadata Types
+!force-app/main/default/customMetadata/**
