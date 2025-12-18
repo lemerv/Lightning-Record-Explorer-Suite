@@ -1,0 +1,41 @@
+.hierarchy-card_field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.75rem;
+  word-break: break-word;
+}
+
+.hierarchy-card_field-label {
+  color: var(--lwc-colorTextPlaceholder, #9c9c9c);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.02em;
+}
+
+.hierarchy-card_field-value-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.hierarchy-card_field--parent {
+  padding-top: 0.35rem;
+}
+
+.hierarchy-card_parent-badge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #f4f6f9;
+  border: 1px solid var(--lwc-borderColor, #e5e5e5);
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.75rem 0.25rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+.hierarchy-card_parent-value {
+  color: var(--lwc-colorTextDefault, #080707);
+  display: block;
+}

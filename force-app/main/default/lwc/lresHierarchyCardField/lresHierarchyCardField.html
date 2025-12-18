@@ -1,0 +1,31 @@
+<template>
+  <div class={wrapperClass}>
+    <template if:true={isParentBadge}>
+      <div class="hierarchy-card_parent-badge">
+        <span class="hierarchy-card_field-label">{detail.label}</span>
+        <span class="hierarchy-card_parent-value">{detail.value}</span>
+      </div>
+    </template>
+    <template if:false={isParentBadge}>
+      <template if:true={showLabel}>
+        <span class="hierarchy-card_field-label"> {detail.label} </span>
+      </template>
+      <div class="hierarchy-card_field-value-row">
+        <template if:true={detail.iconName}>
+          <lightning-icon
+            class="hierarchy-field_icon"
+            icon-name={detail.iconName}
+            size="xx-small"
+            alternative-text=""
+          ></lightning-icon>
+        </template>
+        <template if:true={detail.iconEmoji}>
+          <span class="hierarchy-field_emoji" aria-hidden="true">
+            {detail.iconEmoji}
+          </span>
+        </template>
+        <span class="hierarchy-card_field-value"> {detail.value} </span>
+      </div>
+    </template>
+  </div>
+</template>
