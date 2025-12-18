@@ -3,7 +3,6 @@
     <fullName>Filter_Field_API_Names__c</fullName>
     <fieldManageability>DeveloperControlled</fieldManageability>
     <label>Filter Field API Names</label>
-    <length>32768</length>
-    <type>LongTextArea</type>
-    <visibleLines>3</visibleLines>
+    <length>255</length>
+    <type>Text</type>
 </CustomField>
