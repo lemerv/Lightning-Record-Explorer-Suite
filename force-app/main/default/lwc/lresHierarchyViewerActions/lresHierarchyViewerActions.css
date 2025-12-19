@@ -1,0 +1,147 @@
+.viewer-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.viewer-actions_clear {
+  border: none;
+  background: transparent;
+  color: var(--lwc-brandTextLink, #0b5cab);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.75rem;
+}
+
+.viewer-actions_clear:disabled {
+  color: var(--lwc-colorTextWeak, #706e6b);
+  cursor: default;
+}
+
+.viewer-actions_clear:not(:disabled):hover,
+.viewer-actions_clear:not(:disabled):focus {
+  text-decoration: underline;
+}
+
+.filter-search_input {
+  max-width: 16rem;
+  display: inline-flex;
+  align-items: center;
+  --slds-c-input-radius-border: 999px;
+  --slds-c-input-color-border: var(--lwc-colorBorderInput, #c9c9c9);
+  --slds-c-input-color-border-focus: var(--lwc-brandTextLink, #0b5cab);
+  --slds-c-input-shadow: none;
+  --slds-c-input-shadow-focus: 0 0 0 1px var(--lwc-brandTextLink, #0b5cab);
+  --slds-c-input-padding-inline: 0.85rem;
+  --slds-c-input-padding-block: 0.35rem;
+  --slds-c-input-line-height: 1.5rem;
+}
+
+.filter-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.viewer-actions_divider {
+  color: var(--lwc-colorTextWeak, #706e6b);
+  margin: 0 0.5rem;
+  font-size: 0.75rem;
+}
+
+.filter-dropdown {
+  position: relative;
+}
+
+.filter-dropdown_button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  border: var(--lwc-borderWidthThin, 1px) solid
+    var(--lwc-colorBorderInput, #c9c9c9);
+  background: #ffffff;
+  color: var(--lwc-colorTextInput, #080707);
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  box-shadow: var(--lwc-shadowButtonInset, inset 0 0 0 0 rgba(0, 0, 0, 0));
+  transition:
+    border 0.1s ease,
+    box-shadow 0.1s ease;
+}
+
+.filter-dropdown_button lightning-icon {
+  --slds-c-icon-color-foreground: var(--lwc-colorTextInputIcon, #5f5f5f);
+}
+
+.sort-dropdown_button lightning-icon:first-of-type {
+  --slds-c-icon-color-foreground: var(--lwc-brandTextLink, #0b5cab);
+}
+
+.filter-dropdown_button:hover,
+.filter-dropdown_button:focus {
+  border-color: var(--lwc-brandTextLink, #0b5cab);
+  box-shadow: 0 0 0 1px var(--lwc-brandTextLink, #0b5cab);
+}
+
+.filter-dropdown_button--active {
+  border-color: #1b96ff;
+  background: #e6f2ff;
+  color: #0b5cab;
+  box-shadow: 0 0 0 1px rgba(27, 150, 255, 0.25);
+}
+
+.filter-dropdown_button--active lightning-icon {
+  --slds-c-icon-color-foreground: #0b5cab;
+}
+
+.filter-dropdown_button--active .filter-dropdown_label {
+  color: #0b5cab;
+}
+
+.filter-dropdown_label {
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.filter-menu {
+  position: absolute;
+  min-width: 12rem;
+  margin-top: 0.25rem;
+  right: 0;
+  z-index: 10;
+  max-height: 16rem;
+  overflow-y: auto;
+}
+
+.filter-menu_list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+}
+
+.filter-menu_item {
+  padding: 0 0.75rem;
+}
+
+.filter-menu_checkbox {
+  display: block;
+  padding: 0.25rem 0;
+}
+
+.filter-menu_checkbox .slds-form-element__control {
+  margin-top: 0;
+}
+
+.filter-menu_checkbox .slds-form-element__label {
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.viewer-actions_refresh {
+  --slds-c-button-icon-border-radius: 999px;
+  --slds-c-button-icon-size: 2.1rem;
+}

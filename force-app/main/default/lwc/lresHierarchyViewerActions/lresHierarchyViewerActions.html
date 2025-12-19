@@ -1,0 +1,108 @@
+<template>
+  <div class="viewer-actions">
+    <template if:true={filtersAvailable}>
+      <button
+        type="button"
+        class="viewer-actions_clear"
+        onclick={handleClearFiltersClick}
+        disabled={clearFiltersDisabled}
+      >
+        Clear Filters
+      </button>
+      <template for:each={filterDefinitions} for:item="filter">
+        <c-lres-hierarchy-filter-menu
+          key={filter.id}
+          filter={filter}
+        ></c-lres-hierarchy-filter-menu>
+      </template>
+    </template>
+    <template if:true={searchAvailable}>
+      <div class="filter-control">
+        <div class="filter-dropdown">
+          <lightning-input
+            type="search"
+            value={searchValue}
+            onchange={handleSearchInput}
+            onkeyup={handleSearchKeyup}
+            placeholder="Search"
+            variant="label-hidden"
+            class="filter-search_input"
+          ></lightning-input>
+        </div>
+      </div>
+    </template>
+    <template if:true={hasSortOptions}>
+      <span class="viewer-actions_divider">|</span>
+      <div class="filter-control">
+        <div class="filter-dropdown">
+          <button
+            type="button"
+            class={resolvedSortButtonClass}
+            aria-haspopup="true"
+            aria-expanded={isSortMenuOpen}
+            onclick={handleSortMenuToggle}
+          >
+            <lightning-icon
+              icon-name="utility:sort"
+              size="xx-small"
+              alternative-text=""
+            ></lightning-icon>
+            <span class="filter-dropdown_label">{selectedSortLabel}</span>
+            <lightning-icon
+              icon-name="utility:down"
+              size="xx-small"
+              alternative-text=""
+            ></lightning-icon>
+          </button>
+          <template if:true={isSortMenuOpen}>
+            <div
+              class="filter-menu sort-menu slds-dropdown slds-dropdown_left"
+              onclick={handleSortMenuClick}
+              onkeydown={handleSortMenuKeydown}
+              tabindex="-1"
+            >
+              <ul class="filter-menu_list" role="menu">
+                <template for:each={sortFieldOptions} for:item="option">
+                  <li
+                    key={option.value}
+                    class="filter-menu_item"
+                    role="menuitemradio"
+                  >
+                    <lightning-input
+                      type="radio"
+                      name="sortOptions"
+                      value={option.value}
+                      checked={option.selected}
+                      label={option.label}
+                      onchange={handleSortOptionChange}
+                      onclick={handleSortMenuClick}
+                      class="filter-menu_checkbox"
+                    ></lightning-input>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </template>
+        </div>
+      </div>
+      <lightning-button-icon
+        class="viewer-actions_direction"
+        icon-name={sortDirectionIcon}
+        variant="border-filled"
+        alternative-text={sortDirectionAltText}
+        title={sortDirectionAltText}
+        onclick={handleSortDirectionToggle}
+      ></lightning-button-icon>
+      <span class="viewer-actions_divider">|</span>
+      <lightning-button-icon
+        class="viewer-actions_refresh"
+        icon-name="utility:refresh"
+        variant="border-filled"
+        alternative-text="Refresh"
+        title="Refresh"
+        disabled={refreshButtonDisabled}
+        onclick={handleManualRefresh}
+      ></lightning-button-icon>
+    </template>
+  </div>
+</template>
