@@ -4,6 +4,27 @@ public with sharing class LRES_HierarchyExplorerController {
     public Map<Integer, Id> idByLevel;
   }
 
+  private static List<LRES_HierarchyTemplateService.LevelConfig> takeFirstLevels(
+    List<LRES_HierarchyTemplateService.LevelConfig> levels,
+    Integer maxCount
+  ) {
+    List<LRES_HierarchyTemplateService.LevelConfig> result = new List<LRES_HierarchyTemplateService.LevelConfig>();
+    if (
+      levels == null ||
+      levels.isEmpty() ||
+      maxCount == null ||
+      maxCount <= 0
+    ) {
+      return result;
+    }
+
+    Integer limitCount = Math.min(levels.size(), maxCount);
+    for (Integer i = 0; i < limitCount; i += 1) {
+      result.add(levels[i]);
+    }
+    return result;
+  }
+
   @AuraEnabled(cacheable=true)
   public static LRES_HierarchyExplorerDtos.HierarchyResponseDto getHierarchy(
     String templateDeveloperName,
@@ -34,7 +55,7 @@ public with sharing class LRES_HierarchyExplorerController {
       );
     }
     if (levels.size() > resolvedMaxLevels) {
-      levels = levels.subList(0, resolvedMaxLevels);
+      levels = takeFirstLevels(levels, resolvedMaxLevels);
     }
 
     RootPlacement placement = inferRootPlacement(effectiveRootRecordId, levels);
