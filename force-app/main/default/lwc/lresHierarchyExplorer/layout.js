@@ -82,6 +82,7 @@ export function computeTreeLayout(
     positionsById.set(id, {
       left,
       top,
+      depth,
       centerX,
       centerY: top + nodeHeight / 2,
       bottomY: top + nodeHeight

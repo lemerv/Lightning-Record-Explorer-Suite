@@ -66,6 +66,10 @@
                 <behavior>Edit</behavior>
                 <field>Show_Card_Field_Labels__c</field>
             </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Enable_Text_Wrap__c</field>
+            </layoutItems>
         </layoutColumns>
         <style>OneColumn</style>
     </layoutSections>

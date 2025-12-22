@@ -10,7 +10,7 @@
   border: 1px solid var(--lwc-borderColor, #e5e5e5);
   border-radius: 0.5rem;
   overflow: hidden;
-  background: var(--lwc-colorBackgroundAlt, #f4f6f9);
+  background-color: var(--lwc-colorBackgroundAlt, #f4f6f9);
   touch-action: none;
 }
 
@@ -48,8 +48,7 @@
 }
 
 .hierarchy-explorer_node-scroll {
-  max-height: 180px;
-  overflow: auto;
+  overflow: visible;
 }
 
 .hierarchy-explorer_warning {

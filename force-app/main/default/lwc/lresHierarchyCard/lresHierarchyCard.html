@@ -22,9 +22,10 @@
         </span>
       </template>
       <a
-        class="hierarchy-card_title-link"
+        class={titleLinkClass}
         href="javascript:void(0);"
         draggable="false"
+        title={cardTitle}
         onclick={handleTitleClick}
       >
         {cardTitle}

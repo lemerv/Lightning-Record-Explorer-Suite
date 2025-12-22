@@ -9,6 +9,11 @@
   padding: 0.75rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   cursor: grab;
+  box-sizing: border-box;
+  max-height: var(--lres-hierarchy-card-max-height, none);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   transition:
     transform 0.1s ease,
     box-shadow 0.1s ease;
@@ -38,8 +43,19 @@
 
 .hierarchy-card_title-link {
   flex: 1 1 auto;
+  min-width: 0;
   color: var(--lwc-brandTextLink, #0b5cab);
   text-decoration: none;
+}
+
+.hierarchy-card_title-link.is-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hierarchy-card_title-link.is-wrap {
+  white-space: normal;
 }
 
 .hierarchy-card_title-link:focus,
@@ -64,6 +80,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
+  flex: 1 1 auto;
+  overflow: auto;
 }
 
 .hierarchy-card_field-value {

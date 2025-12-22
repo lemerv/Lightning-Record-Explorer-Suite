@@ -544,6 +544,7 @@ public with sharing class LRES_HierarchyExplorerController {
     node.objectApiName = levelConfig.objectApiName;
     node.levelNumber = levelConfig.levelNumber;
     node.showCardFieldLabels = levelConfig.showCardFieldLabels;
+    node.enableTextWrap = levelConfig.enableTextWrap;
     node.details = new List<LRES_HierarchyExplorerDtos.DetailDto>();
 
     List<String> fields = levelConfig.cardFieldApiNames == null

@@ -14,6 +14,8 @@ public with sharing class LRES_HierarchyTemplateService {
     public List<String> cardFieldIcons;
     @AuraEnabled
     public Boolean showCardFieldLabels;
+    @AuraEnabled
+    public Boolean enableTextWrap;
   }
 
   public class TemplateConfig {
@@ -71,7 +73,8 @@ public with sharing class LRES_HierarchyTemplateService {
         Child_Object_Relationship_Name__c,
         Card_Field_API_Names__c,
         Card_Field_Icons__c,
-        Show_Card_Field_Labels__c
+        Show_Card_Field_Labels__c,
+        Enable_Text_Wrap__c
       FROM LRES_Hierarchy_Template_Level__mdt
       WHERE Hierarchy_Template__r.DeveloperName = :templateDeveloperName
       ORDER BY Level_Number__c ASC
@@ -117,6 +120,7 @@ public with sharing class LRES_HierarchyTemplateService {
       level.cardFieldApiNames = parseCsv(levelMdt.Card_Field_API_Names__c);
       level.cardFieldIcons = parseCsv(levelMdt.Card_Field_Icons__c);
       level.showCardFieldLabels = levelMdt.Show_Card_Field_Labels__c;
+      level.enableTextWrap = levelMdt.Enable_Text_Wrap__c;
 
       if (String.isBlank(level.objectApiName)) {
         throw new AuraHandledException(

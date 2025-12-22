@@ -24,7 +24,10 @@
         onpointerup={handleCanvasPointerUp}
         onpointercancel={handleCanvasPointerUp}
       >
-        <div class="hierarchy-explorer_controls">
+        <div
+          class="hierarchy-explorer_controls"
+          onpointerdown={handleControlsPointerDown}
+        >
           <lightning-button-icon
             icon-name="utility:zoomin"
             variant="border-filled"
@@ -61,12 +64,17 @@
             <div
               key={node.id}
               class="hierarchy-explorer_node"
+              data-node-id={node.id}
               style={node.style}
             >
-              <div class="hierarchy-explorer_node-scroll">
+              <div
+                class="hierarchy-explorer_node-scroll"
+                style={node.scrollStyle}
+              >
                 <c-lres-hierarchy-card
                   card={node.card}
                   show-card-field-labels={node.card.showCardFieldLabels}
+                  enable-text-wrap={node.enableTextWrap}
                   oncardtitleclick={handleCardTitleClick}
                   oncardopenexternallink={handleCardOpenExternalLink}
                 ></c-lres-hierarchy-card>

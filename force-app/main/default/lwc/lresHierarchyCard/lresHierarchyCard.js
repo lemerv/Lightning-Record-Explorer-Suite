@@ -4,6 +4,7 @@ export default class HierarchyCard extends LightningElement {
   @api card = { details: [] };
   @api columnKey;
   @api showCardFieldLabels = false;
+  @api enableTextWrap = false;
   @api draggedRecordId;
   @api dragDisabled = false;
 
@@ -29,6 +30,12 @@ export default class HierarchyCard extends LightningElement {
 
   get cardId() {
     return this.card?.id;
+  }
+
+  get titleLinkClass() {
+    return `hierarchy-card_title-link${
+      this.enableTextWrap ? " is-wrap" : " is-truncate"
+    }`;
   }
 
   get cardClass() {
