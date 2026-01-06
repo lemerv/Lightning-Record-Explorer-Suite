@@ -87,7 +87,7 @@ If you encounter issues, have questions, find a bug, or want to request a featur
 ## Installation Requirements
 
 - **Salesforce Platform**: Compatible with Lightning Experience
-- **Permissions**: Standard user permissions sufficient for basic usage
+- **Permissions**: `LRES_Access` permission set must be assigned to users. Then standard user permissions sufficient for basic usage
 
 ![Kanban Explorer for Cases](docs/images/Cases-Parentless-Board.png)
 
