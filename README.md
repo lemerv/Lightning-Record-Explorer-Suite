@@ -21,7 +21,6 @@ Kanban Explorer is a Lightning Web Component that transforms your Salesforce rec
 - **Multiple data modes** - parent mode (single select and multi select), parentless mode, and record page mode
 - **Rich customization** - configurable fields, filters, search, and sorting
 - **Visual enhancements** - icons, emojis, and custom card layouts
-- **Real-time updates** - record changes sync instantly with Salesforce
 
 ## Quick Start
 
@@ -65,7 +64,6 @@ Kanban Explorer adapts to various business processes:
 
 - **Drag & Drop**: Move cards between columns to update record values
 - **Record Editing**: Click cards to open modal windows for quick record viewing and editing
-- **Real-time Updates**: Changes sync immediately with Salesforce
 - **Parent Selection**: Switch between different parent records or select multiple parents to view thier child records
 
 ### 🎨 Visual Customization
