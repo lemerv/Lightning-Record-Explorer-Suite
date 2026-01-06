@@ -44,17 +44,20 @@ public with sharing class LRES_WhereClauseParser {
     String objectApiName;
     Set<String> allowedFieldPaths;
     String blockedClausePrefix;
+    Boolean debugWhereErrors;
 
     ParseState(
       List<Token> tokens,
       String objectApiName,
       Set<String> allowedFieldPaths,
-      String blockedClausePrefix
+      String blockedClausePrefix,
+      Boolean debugWhereErrors
     ) {
       this.tokens = tokens;
       this.objectApiName = objectApiName;
       this.allowedFieldPaths = normalizeAllowList(allowedFieldPaths);
       this.blockedClausePrefix = blockedClausePrefix;
+      this.debugWhereErrors = debugWhereErrors == true;
     }
 
     private Set<String> normalizeAllowList(Set<String> rawList) {
@@ -270,6 +273,22 @@ public with sharing class LRES_WhereClauseParser {
     Set<String> allowedFieldPaths,
     String blockedClausePrefix
   ) {
+    return parse(
+      rawWhere,
+      objectApiName,
+      allowedFieldPaths,
+      blockedClausePrefix,
+      false
+    );
+  }
+
+  public static ParseResult parse(
+    String rawWhere,
+    String objectApiName,
+    Set<String> allowedFieldPaths,
+    String blockedClausePrefix,
+    Boolean debugWhereErrors
+  ) {
     if (String.isBlank(rawWhere)) {
       return new ParseResult(null, new Set<String>());
     }
@@ -307,7 +326,8 @@ public with sharing class LRES_WhereClauseParser {
         tokens,
         objectApiName,
         allowedFieldPaths,
-        blockedClausePrefix
+        blockedClausePrefix,
+        debugWhereErrors
       );
       AstNode root = parseExpression(state);
       if (!state.match(TokenType.EOF, null)) {
@@ -646,23 +666,32 @@ public with sharing class LRES_WhereClauseParser {
     String fieldPath
   ) {
     if (String.isBlank(fieldPath)) {
-      throw buildException(
+      throw buildFieldException(
         state.blockedClausePrefix,
-        'invalid field reference.'
+        'invalid field reference.',
+        fieldPath,
+        state.debugWhereErrors
       );
     }
     String normalizedPath = stripObjectPrefix(state.objectApiName, fieldPath);
     if (!isValidFieldPath(normalizedPath)) {
-      throw buildException(
+      throw buildFieldException(
         state.blockedClausePrefix,
-        'invalid field reference.'
+        'invalid field reference.',
+        fieldPath,
+        state.debugWhereErrors
       );
     }
     if (
       state.allowedFieldPaths != null &&
       !state.allowedFieldPaths.contains(normalizedPath.toLowerCase())
     ) {
-      throw buildException(state.blockedClausePrefix, 'field is not allowed.');
+      throw buildFieldException(
+        state.blockedClausePrefix,
+        'field is not allowed.',
+        normalizedPath,
+        state.debugWhereErrors
+      );
     }
     if (String.isBlank(state.objectApiName)) {
       return new FieldInfo(normalizedPath, Schema.DisplayType.STRING, false);
@@ -682,9 +711,11 @@ public with sharing class LRES_WhereClauseParser {
       state.blockedClausePrefix
     );
     if (info == null) {
-      throw buildException(
+      throw buildFieldException(
         state.blockedClausePrefix,
-        'invalid field reference.'
+        'invalid field reference.',
+        normalizedPath,
+        state.debugWhereErrors
       );
     }
     return info;
@@ -1037,6 +1068,21 @@ public with sharing class LRES_WhereClauseParser {
     AuraHandledException ex = new AuraHandledException(prefix + message);
     ex.setMessage(prefix + message);
     return ex;
+  }
+
+  private static AuraHandledException buildFieldException(
+    String blockedClausePrefix,
+    String message,
+    String fieldPath,
+    Boolean debugWhereErrors
+  ) {
+    if (debugWhereErrors == true && String.isNotBlank(fieldPath)) {
+      return buildException(
+        blockedClausePrefix,
+        message + ' (' + fieldPath + ')'
+      );
+    }
+    return buildException(blockedClausePrefix, message);
   }
 
   private static void logParseFailure(String objectApiName, String message) {

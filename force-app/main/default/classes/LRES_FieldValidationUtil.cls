@@ -41,7 +41,13 @@ public with sharing class LRES_FieldValidationUtil {
     String rawWhere,
     String blockedClausePrefix
   ) {
-    return sanitizeWhereClause(rawWhere, blockedClausePrefix, null, null);
+    return sanitizeWhereClause(
+      rawWhere,
+      blockedClausePrefix,
+      null,
+      null,
+      false
+    );
   }
 
   public static String sanitizeWhereClause(
@@ -49,6 +55,22 @@ public with sharing class LRES_FieldValidationUtil {
     String blockedClausePrefix,
     String objectApiName,
     Set<String> allowedFieldPaths
+  ) {
+    return sanitizeWhereClause(
+      rawWhere,
+      blockedClausePrefix,
+      objectApiName,
+      allowedFieldPaths,
+      false
+    );
+  }
+
+  public static String sanitizeWhereClause(
+    String rawWhere,
+    String blockedClausePrefix,
+    String objectApiName,
+    Set<String> allowedFieldPaths,
+    Boolean debugWhereErrors
   ) {
     if (String.isBlank(rawWhere)) {
       return null;
@@ -69,7 +91,8 @@ public with sharing class LRES_FieldValidationUtil {
       trimmed,
       objectApiName,
       allowedFieldPaths,
-      blockedClausePrefix
+      blockedClausePrefix,
+      debugWhereErrors
     );
     return result != null ? result.canonicalWhere : null;
   }
@@ -261,13 +284,27 @@ public with sharing class LRES_FieldValidationUtil {
    * Uses regex to identify field references and filters out SQL keywords.
    */
   public static List<String> extractFieldsFromWhereClause(String whereClause) {
-    return extractFieldsFromWhereClause(whereClause, null, null);
+    return extractFieldsFromWhereClause(whereClause, null, null, false);
   }
 
   public static List<String> extractFieldsFromWhereClause(
     String whereClause,
     String objectApiName,
     Set<String> allowedFieldPaths
+  ) {
+    return extractFieldsFromWhereClause(
+      whereClause,
+      objectApiName,
+      allowedFieldPaths,
+      false
+    );
+  }
+
+  public static List<String> extractFieldsFromWhereClause(
+    String whereClause,
+    String objectApiName,
+    Set<String> allowedFieldPaths,
+    Boolean debugWhereErrors
   ) {
     if (String.isBlank(whereClause)) {
       return new List<String>();
@@ -277,7 +314,8 @@ public with sharing class LRES_FieldValidationUtil {
       whereClause,
       objectApiName,
       allowedFieldPaths,
-      'Filter cannot include '
+      'Filter cannot include ',
+      debugWhereErrors
     );
     return result != null &&
       result.referencedFields != null

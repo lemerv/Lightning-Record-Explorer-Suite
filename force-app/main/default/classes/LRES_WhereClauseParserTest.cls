@@ -9,6 +9,18 @@ private class LRES_WhereClauseParserTest {
     );
   }
 
+  private static LRES_WhereClauseParser.ParseResult parseCaseDebug(
+    String clause
+  ) {
+    return LRES_WhereClauseParser.parse(
+      clause,
+      'Case',
+      null,
+      'Card record filter cannot include ',
+      true
+    );
+  }
+
   @IsTest
   static void parsesSimplePredicateAndRelationship() {
     LRES_WhereClauseParser.ParseResult simple = parseCase('Status = \'New\'');
@@ -97,6 +109,33 @@ private class LRES_WhereClauseParserTest {
       escapeThrown,
       'Backslashes in string literals should be rejected.'
     );
+  }
+
+  @IsTest
+  static void debugInvalidFieldIncludesFieldName() {
+    Boolean normalThrown = false;
+    try {
+      parseCase('Bad$Field = \'Test\'');
+    } catch (AuraHandledException ex) {
+      normalThrown = true;
+      System.assert(
+        !ex.getMessage().contains('Bad$Field'),
+        'Non-debug errors should not include field names.'
+      );
+    }
+    System.assert(normalThrown, 'Invalid fields should throw in normal mode.');
+
+    Boolean debugThrown = false;
+    try {
+      parseCaseDebug('Bad$Field = \'Test\'');
+    } catch (AuraHandledException ex) {
+      debugThrown = true;
+      System.assert(
+        ex.getMessage().contains('Bad$Field'),
+        'Debug errors should include invalid field names.'
+      );
+    }
+    System.assert(debugThrown, 'Invalid fields should throw in debug mode.');
   }
 
   @IsTest

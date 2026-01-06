@@ -86,10 +86,13 @@ export async function refreshParentlessCardRecords(
   });
   if (component._debugLoggingEnabled) {
     // eslint-disable-next-line no-console
-    console.log("[KanbanExplorer][Debug] refreshParentlessCardRecords invoked", {
-      fieldListCount: fieldList?.length || 0,
-      cardObjectApiName: component.cardObjectApiName
-    });
+    console.log(
+      "[KanbanExplorer][Debug] refreshParentlessCardRecords invoked",
+      {
+        fieldListCount: fieldList?.length || 0,
+        cardObjectApiName: component.cardObjectApiName
+      }
+    );
   }
   const records = await fetchParentlessCardRecords({
     cardObjectApiName: component.cardObjectApiName,
@@ -100,7 +103,8 @@ export async function refreshParentlessCardRecords(
     sortDirection: component.sortDirection,
     limitSize: component.dataFetchPageSize,
     cardWhereClause: component.cardRecordsWhereClause,
-    orderByClause: component.cardRecordsOrderByClause
+    orderByClause: component.cardRecordsOrderByClause,
+    debugWhereErrors: component._debugLoggingEnabled
   });
   if (Array.isArray(records)) {
     component.logInfo("Parentless card snapshot received.", {
@@ -153,7 +157,8 @@ export async function executeDataFetch(
     sortDirection: component.sortDirection,
     limitSize: component.dataFetchPageSize,
     cardWhereClause: component.cardRecordsWhereClause,
-    orderByClause: component.cardRecordsOrderByClause
+    orderByClause: component.cardRecordsOrderByClause,
+    debugWhereErrors: component._debugLoggingEnabled
   });
   if (component._debugLoggingEnabled) {
     // eslint-disable-next-line no-console

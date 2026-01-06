@@ -24,7 +24,8 @@ private class LRES_KanbanCardRecordsCtrlTest {
       'ASC',
       10,
       null,
-      null
+      null,
+      false
     );
     Test.stopTest();
 
@@ -61,7 +62,8 @@ private class LRES_KanbanCardRecordsCtrlTest {
       'ASC',
       10,
       null,
-      null
+      null,
+      false
     );
     Test.stopTest();
 
@@ -101,7 +103,8 @@ private class LRES_KanbanCardRecordsCtrlTest {
       'ASC',
       10,
       null,
-      null
+      null,
+      false
     );
     Test.stopTest();
 
@@ -159,7 +162,8 @@ private class LRES_KanbanCardRecordsCtrlTest {
       'ASC',
       10,
       'Status = \'Working\'',
-      null
+      null,
+      false
     );
     Test.stopTest();
 
@@ -189,7 +193,8 @@ private class LRES_KanbanCardRecordsCtrlTest {
         'ASC',
         5,
         'Status = \'Working\' ORDER BY CreatedDate DESC',
-        null
+        null,
+        false
       );
     } catch (AuraHandledException ex) {
       threw = true;
@@ -220,7 +225,8 @@ private class LRES_KanbanCardRecordsCtrlTest {
         'ASC',
         5,
         'IsClosed LIKE \'T%\'',
-        null
+        null,
+        false
       );
     } catch (AuraHandledException ex) {
       threw = true;
@@ -252,7 +258,8 @@ private class LRES_KanbanCardRecordsCtrlTest {
       'ASC',
       5,
       'CreatedDate = TODAY',
-      null
+      null,
+      false
     );
 
     System.assertEquals(
@@ -291,7 +298,8 @@ private class LRES_KanbanCardRecordsCtrlTest {
       'ASC',
       10,
       null,
-      'CreatedDate DESC, Id DESC'
+      'CreatedDate DESC, Id DESC',
+      false
     );
     Test.stopTest();
 
@@ -321,7 +329,8 @@ private class LRES_KanbanCardRecordsCtrlTest {
         'ASC',
         10,
         null,
-        'CreatedDate DESC LIMIT 5'
+        'CreatedDate DESC LIMIT 5',
+        false
       );
     } catch (AuraHandledException ex) {
       threw = true;
@@ -346,7 +355,8 @@ private class LRES_KanbanCardRecordsCtrlTest {
       'ASC',
       10,
       'Status = \'Working\'',
-      null
+      null,
+      false
     );
     Test.stopTest();
 
@@ -378,7 +388,8 @@ private class LRES_KanbanCardRecordsCtrlTest {
       'ASC',
       10,
       null,
-      'CreatedDate DESC, Id DESC'
+      'CreatedDate DESC, Id DESC',
+      false
     );
     Test.stopTest();
 

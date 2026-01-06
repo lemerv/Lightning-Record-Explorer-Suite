@@ -9,7 +9,8 @@ public with sharing class LRES_KanbanParentRecordsController {
     String whereClause,
     String orderByClause,
     String fieldApiNames,
-    Integer limitSize
+    Integer limitSize,
+    Boolean debugWhereErrors
   ) {
     if (String.isBlank(objectApiName)) {
       return new List<ParentRecordOption>();
@@ -43,7 +44,8 @@ public with sharing class LRES_KanbanParentRecordsController {
       whereClause,
       'Parent record filter cannot include ',
       objectApiName,
-      null
+      null,
+      debugWhereErrors
     );
 
     List<String> whereFields = new List<String>();
@@ -51,7 +53,8 @@ public with sharing class LRES_KanbanParentRecordsController {
       whereFields = LRES_FieldValidationUtil.extractFieldsFromWhereClause(
         sanitizedWhere,
         objectApiName,
-        null
+        null,
+        debugWhereErrors
       );
     }
 

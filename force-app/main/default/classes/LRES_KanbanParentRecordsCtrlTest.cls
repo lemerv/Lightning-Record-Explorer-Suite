@@ -31,7 +31,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
       'WHERE Name != null',
       null,
       'Industry,Parent.Name,Parent.Parent.Name,Bad$Field,,CreatedDate',
-      500
+      500,
+      false
     );
 
     System.assertEquals(
@@ -105,7 +106,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
       'where',
       null,
       'Subject,Owner.Name',
-      0
+      0,
+      false
     );
 
     System.assertEquals(
@@ -144,7 +146,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
       ' Name != null ',
       null,
       null,
-      10
+      10,
+      false
     );
     System.assertEquals(
       0,
@@ -157,7 +160,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
       null,
       null,
       null,
-      null
+      null,
+      false
     );
     System.assertEquals(
       2,
@@ -171,7 +175,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
         null,
         null,
         null,
-        5
+        5,
+        false
       );
       System.assert(
         false,
@@ -194,7 +199,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
         'Name = \'',
         null,
         null,
-        5
+        5,
+        false
       );
       System.assert(
         false,
@@ -216,7 +222,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
         'WHERE Name != null ORDER BY CreatedDate',
         null,
         null,
-        5
+        5,
+        false
       );
     } catch (AuraHandledException ex) {
       orderByExceptionThrown = true;
@@ -250,7 +257,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
       null,
       null,
       null,
-      1
+      1,
+      false
     );
 
     System.assertEquals(
@@ -271,7 +279,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
       null,
       'Name DESC',
       null,
-      10
+      10,
+      false
     );
 
     System.assertEquals(
@@ -290,7 +299,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
       null,
       'Name ASC',
       null,
-      10
+      10,
+      false
     );
 
     System.assertEquals(
@@ -309,7 +319,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
         null,
         'Name LIMIT 2',
         null,
-        5
+        5,
+        false
       );
     } catch (AuraHandledException ex) {
       blockedThrown = true;
@@ -332,7 +343,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
         null,
         'Bad$Field DESC',
         null,
-        5
+        5,
+        false
       );
     } catch (AuraHandledException ex) {
       invalidFieldThrown = true;
@@ -362,7 +374,8 @@ private class LRES_KanbanParentRecordsCtrlTest {
       null,
       null,
       null,
-      500
+      500,
+      false
     );
 
     System.assertEquals(

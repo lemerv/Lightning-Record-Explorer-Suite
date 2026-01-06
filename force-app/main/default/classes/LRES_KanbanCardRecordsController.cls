@@ -10,7 +10,8 @@ public with sharing class LRES_KanbanCardRecordsController {
     String sortDirection,
     Integer limitSize,
     String cardWhereClause,
-    String orderByClause
+    String orderByClause,
+    Boolean debugWhereErrors
   ) {
     List<Id> resolvedParentIds = consolidateParentIds(
       parentRecordId,
@@ -66,7 +67,8 @@ public with sharing class LRES_KanbanCardRecordsController {
       cardWhereClause,
       'Card record filter cannot include ',
       cardObjectApiName,
-      null
+      null,
+      debugWhereErrors
     );
 
     // Validate WHERE clause fields for FLS
@@ -74,7 +76,8 @@ public with sharing class LRES_KanbanCardRecordsController {
       List<String> whereFields = LRES_FieldValidationUtil.extractFieldsFromWhereClause(
         sanitizedWhere,
         cardObjectApiName,
-        null
+        null,
+        debugWhereErrors
       );
       if (!whereFields.isEmpty()) {
         LRES_FieldValidationUtil.FlsValidationResult whereFlsResult = LRES_FieldValidationUtil.validateFieldAccessibility(
@@ -121,7 +124,8 @@ public with sharing class LRES_KanbanCardRecordsController {
     String sortDirection,
     Integer limitSize,
     String cardWhereClause,
-    String orderByClause
+    String orderByClause,
+    Boolean debugWhereErrors
   ) {
     if (String.isBlank(cardObjectApiName)) {
       throw new AuraHandledException('Card object API name is required.');
@@ -141,7 +145,8 @@ public with sharing class LRES_KanbanCardRecordsController {
       cardWhereClause,
       'Card record filter cannot include ',
       cardObjectApiName,
-      null
+      null,
+      debugWhereErrors
     );
 
     // Validate WHERE clause fields for FLS
@@ -149,7 +154,8 @@ public with sharing class LRES_KanbanCardRecordsController {
       List<String> whereFields = LRES_FieldValidationUtil.extractFieldsFromWhereClause(
         sanitizedWhere,
         cardObjectApiName,
-        null
+        null,
+        debugWhereErrors
       );
       if (!whereFields.isEmpty()) {
         LRES_FieldValidationUtil.FlsValidationResult whereFlsResult = LRES_FieldValidationUtil.validateFieldAccessibility(
