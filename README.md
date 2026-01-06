@@ -17,10 +17,10 @@ Kanban Explorer is a Lightning Web Component that transforms your Salesforce rec
 🚀 **Key Features**
 
 - **Dynamic kanban boards** - drag-and-drop functionality
-- **Context-aware operation** - works on record pages, app pages, and home pages
+- **Context-aware** - works on record pages, app pages, and home pages
 - **Multiple data modes** - parent mode (single select and multi select), parentless mode, and record page mode
-- **Rich customization** - configurable fields, filters, search, and sorting
-- **Visual enhancements** - icons, emojis, and custom card layouts
+- **Flexible customization** - configurable fields, filters, search, and sorting
+- **Visual goodies** - add icons and emojis to cards
 
 ## Quick Start
 
@@ -38,7 +38,7 @@ Kanban Explorer is a Lightning Web Component that transforms your Salesforce rec
 
 ## Typical Use Cases
 
-Kanban Explorer adapts to various business processes:
+Kanban Explorer is adaptable:
 
 - **Service** - Case management by status, priority, or team
 - **Sales** - Opportunity pipeline tracking through sales stages
@@ -56,7 +56,7 @@ Kanban Explorer adapts to various business processes:
 ### 🎛️ Configuration Options
 
 - **Custom Grouping**: Group by picklist or text fields (Status, Stage, Priority, etc.)
-- **Card Customization**: Choose which fields display on cards with custom icons and formatting
+- **Card Customization**: Choose which fields display on cards and add custom icons/emojis
 - **Advanced Filtering**: Multi-select filters, search functionality, and custom sorting
 - **SOQL Control**: Precise control over which records appear with custom WHERE and ORDER BY clauses
 
@@ -75,10 +75,9 @@ Kanban Explorer adapts to various business processes:
 
 ### 🔒 Safe and Secure
 
-1. **Field Level Security**: Component respects Salesforce field-level security
-2. **Record Access**: Respects record sharing and visibility
-3. **Object Security**: Users need appropriate object permissions
-4. **SOQL Security**: WITH SECURITY_ENFORCED automatically applied and optional clauses are sanitised
+- **Field Level Security**: Component respects field-level security and gracefully drops inaccessible fields
+- **Record Access**: Respects record sharing and visibility
+- **SOQL Security**: All soql queries run with security enforced and optional clauses are sanitised
 
 ## Getting Help
 
@@ -87,7 +86,7 @@ If you encounter issues, have questions, find a bug, or want to request a featur
 ## Installation Requirements
 
 - **Salesforce Platform**: Compatible with Lightning Experience
-- **Permissions**: `LRES_Access` permission set must be assigned to users. Then standard user permissions sufficient for basic usage
+- **Permissions**: Simply assign the `LRES_Access` permission set to users
 
 ![Kanban Explorer for Cases](docs/images/Cases-Parentless-Board.png)
 
