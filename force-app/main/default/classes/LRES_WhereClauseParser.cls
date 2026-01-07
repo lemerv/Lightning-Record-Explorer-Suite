@@ -100,7 +100,7 @@ public with sharing class LRES_WhereClauseParser {
 
     void requireToken(TokenType type, String valueUpper) {
       if (!match(type, valueUpper)) {
-        throw buildException(blockedClausePrefix, 'unsupported tokens.');
+        throw buildException(this, 'unsupported tokens.');
       }
       consume();
     }
@@ -399,7 +399,7 @@ public with sharing class LRES_WhereClauseParser {
 
     Token first = state.current();
     if (first.type != TokenType.WORD) {
-      throw buildException(state.blockedClausePrefix, 'unsupported tokens.');
+      throw buildException(state, 'unsupported tokens.');
     }
     String leftExpression;
     FieldInfo fieldInfo;
@@ -412,10 +412,7 @@ public with sharing class LRES_WhereClauseParser {
       state.requireToken(TokenType.LPAREN, null);
       Token fieldToken = state.current();
       if (fieldToken.type != TokenType.WORD) {
-        throw buildException(
-          state.blockedClausePrefix,
-          'invalid field reference.'
-        );
+        throw buildException(state, 'invalid field reference.');
       }
       fieldInfo = resolveFieldPath(state, fieldToken.value);
       if (
@@ -477,7 +474,7 @@ public with sharing class LRES_WhereClauseParser {
         return upper;
       }
     }
-    throw buildException(state.blockedClausePrefix, 'unsupported tokens.');
+    throw buildException(state, 'unsupported tokens.');
   }
 
   private static String parseRightExpression(
@@ -563,7 +560,7 @@ public with sharing class LRES_WhereClauseParser {
         'boolean'
       );
     }
-    throw buildException(state.blockedClausePrefix, 'unsupported literal.');
+    throw buildException(state, 'unsupported literal.');
   }
 
   private static Boolean isOperatorAllowed(
@@ -883,7 +880,7 @@ public with sharing class LRES_WhereClauseParser {
         Integer start = index;
         index = consumeWord(input, index);
         String word = input.substring(start, index);
-        Token wordToken = buildWordToken(word);
+        Token wordToken = buildWordToken(word, start);
         if (wordToken != null) {
           tokens.add(wordToken);
           continue;
@@ -986,18 +983,18 @@ public with sharing class LRES_WhereClauseParser {
     return i;
   }
 
-  private static Token buildWordToken(String word) {
+  private static Token buildWordToken(String word, Integer position) {
     String upper = word.toUpperCase();
     if (upper == 'NULL') {
-      return new Token(TokenType.NULL_LITERAL, upper, 0);
+      return new Token(TokenType.NULL_LITERAL, upper, position);
     }
     if (upper == 'TRUE' || upper == 'FALSE') {
-      return new Token(TokenType.BOOLEAN_LITERAL, upper, 0);
+      return new Token(TokenType.BOOLEAN_LITERAL, upper, position);
     }
     if (
       DATE_LITERAL_KEYWORDS.contains(upper) || isDateLiteralWithOffset(word)
     ) {
-      return new Token(TokenType.DATE_LITERAL, upper, 0);
+      return new Token(TokenType.DATE_LITERAL, upper, position);
     }
     return null;
   }
@@ -1079,6 +1076,30 @@ public with sharing class LRES_WhereClauseParser {
     AuraHandledException ex = new AuraHandledException(prefix + message);
     ex.setMessage(prefix + message);
     return ex;
+  }
+
+  private static AuraHandledException buildException(
+    ParseState state,
+    String message
+  ) {
+    if (state == null) {
+      return buildException((String) null, message);
+    }
+    String fullMessage = message;
+    Token token = state.current();
+    if (token != null && token.type != TokenType.EOF) {
+      if (String.isNotBlank(token.value)) {
+        fullMessage +=
+          ' (token=\'' +
+          token.value +
+          '\', pos=' +
+          token.position +
+          ')';
+      } else {
+        fullMessage += ' (pos=' + token.position + ')';
+      }
+    }
+    return buildException(state.blockedClausePrefix, fullMessage);
   }
 
   private static AuraHandledException buildFieldException(

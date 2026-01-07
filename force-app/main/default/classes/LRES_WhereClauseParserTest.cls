@@ -261,6 +261,25 @@ private class LRES_WhereClauseParserTest {
   }
 
   @IsTest
+  static void reportsTokenPositionOnParseErrors() {
+    Boolean threw = false;
+    try {
+      parseCase('Status BETWEEN 1');
+    } catch (AuraHandledException ex) {
+      threw = true;
+      System.assert(
+        ex.getMessage().contains('token=\'BETWEEN\''),
+        'Error should include the unexpected token.'
+      );
+      System.assert(
+        ex.getMessage().contains('pos=7'),
+        'Error should include the token position.'
+      );
+    }
+    System.assert(threw, 'Invalid operator should throw.');
+  }
+
+  @IsTest
   static void reusesDescribeCacheAndAllowsReset() {
     String prefix = 'Filter cannot include ';
     LRES_WhereClauseParser.clearDescribeCache();
