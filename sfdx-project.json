@@ -1,8 +1,8 @@
 {
   "packageDirectories": [
     {
-      "versionName": "v0.1.1",
-      "versionNumber": "0.1.1.NEXT",
+      "versionName": "v0.1.2",
+      "versionNumber": "0.1.2.NEXT",
       "path": "force-app",
       "default": true,
       "package": "Lightning Record Explorer Suite",
