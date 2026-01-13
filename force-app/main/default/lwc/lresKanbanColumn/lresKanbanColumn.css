@@ -22,12 +22,19 @@
 .kanban-column_header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch;
+  flex-direction: column;
   padding: 0.75rem 1rem;
   background: var(--slds-c-card-color-background, #f7f7f7);
   border-bottom: 1px solid var(--lwc-borderColor, #e5e5e5);
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
+}
+
+.kanban-column_header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .kanban-column_title {
@@ -44,6 +51,25 @@
   font-size: 0.75rem;
   border-radius: 1rem;
   background: var(--lwc-colorBackgroundAlt, #ecebea);
+}
+
+.kanban-column_summaries {
+  margin-top: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.kanban-column_summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kanban-column_summary-label,
+.kanban-column_summary-value {
+  font-size: 0.75rem;
+  font-weight: 400;
 }
 
 .kanban-column_body {

@@ -1,46 +1,57 @@
 <template>
-    <div class="board-container">
-        <template if:true={isLoading}>
-            <div class="spinner-wrapper">
-                <lightning-spinner alternative-text="Loading related records" size="small"></lightning-spinner>
-            </div>
-        </template>
+  <div class="board-container">
+    <template if:true={isLoading}>
+      <div class="spinner-wrapper">
+        <lightning-spinner
+          alternative-text="Loading related records"
+          size="small"
+        ></lightning-spinner>
+      </div>
+    </template>
 
-        <template if:true={errorMessage}>
-            <div class="slds-text-color_error slds-p-around_medium">
-                {errorMessage}
-            </div>
-        </template>
+    <template if:true={errorMessage}>
+      <div class="slds-text-color_error slds-p-around_medium">
+        {errorMessage}
+      </div>
+    </template>
 
-        <template if:true={hasColumns}>
-            <div class="kanban slds-scrollable_x">
-                <template for:each={columns} for:item="column">
-                    <c-lres-kanban-column
-                        key={column.key}
-                        column={column}
-                        column-section-style={columnSectionStyle}
-                        column-body-style={columnBodyStyle}
-                        show-card-field-labels={showCardFieldLabels}
-                        dragged-record-id={draggedRecordId}
-                        drag-disabled={isLoading}
-                        active-drop-key={activeDropColumnKey}
-                        oncolumndragover={handleColumnDragOver}
-                        oncolumndragenter={handleColumnDragEnter}
-                        oncolumndragleave={handleColumnDragLeave}
-                        oncolumndrop={handleColumnDrop}
-                        oncarddragstart={handleCardDragStart}
-                        oncarddragend={handleCardDragEnd}
-                        oncardtitleclick={handleCardTitleClick}
-                        oncardopenexternallink={handleCardExternalLink}
-                    ></c-lres-kanban-column>
-                </template>
-            </div>
-        </template>
+    <template if:true={warningMessage}>
+      <div class="slds-text-color_warning slds-p-around_medium">
+        {warningMessage}
+      </div>
+    </template>
 
-        <template if:true={showEmptyState}>
-            <div class="slds-text-body_regular slds-p-around_medium slds-align_absolute-center">
-                No related records were found.
-            </div>
+    <template if:true={hasColumns}>
+      <div class="kanban slds-scrollable_x">
+        <template for:each={columns} for:item="column">
+          <c-lres-kanban-column
+            key={column.key}
+            column={column}
+            column-section-style={columnSectionStyle}
+            column-body-style={columnBodyStyle}
+            show-card-field-labels={showCardFieldLabels}
+            dragged-record-id={draggedRecordId}
+            drag-disabled={isLoading}
+            active-drop-key={activeDropColumnKey}
+            oncolumndragover={handleColumnDragOver}
+            oncolumndragenter={handleColumnDragEnter}
+            oncolumndragleave={handleColumnDragLeave}
+            oncolumndrop={handleColumnDrop}
+            oncarddragstart={handleCardDragStart}
+            oncarddragend={handleCardDragEnd}
+            oncardtitleclick={handleCardTitleClick}
+            oncardopenexternallink={handleCardExternalLink}
+          ></c-lres-kanban-column>
         </template>
-    </div>
+      </div>
+    </template>
+
+    <template if:true={showEmptyState}>
+      <div
+        class="slds-text-body_regular slds-p-around_medium slds-align_absolute-center"
+      >
+        No related records were found.
+      </div>
+    </template>
+  </div>
 </template>

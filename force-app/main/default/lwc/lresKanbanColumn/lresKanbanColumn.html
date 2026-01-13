@@ -1,29 +1,41 @@
 <template>
-    <section
-        class={sectionClass}
-        style={columnSectionStyle}
-        data-column-key={columnKey}
-        ondragover={handleDragOver}
-        ondragenter={handleDragEnter}
-        ondragleave={handleDragLeave}
-        ondrop={handleDrop}
-    >
-        <header class="kanban-column_header">
-            <span class="kanban-column_title">{columnLabel}</span>
-            <span class="kanban-column_count">{columnCount}</span>
-        </header>
-        <div class={bodyClass} style={columnBodyStyle}>
-            <template for:each={columnRecords} for:item="card">
-                <c-lres-kanban-card
-                    key={card.id}
-                    card={card}
-                    column-key={columnKey}
-                    show-card-field-labels={showCardFieldLabels}
-                    dragged-record-id={draggedRecordId}
-                    drag-disabled={dragDisabled}
-                    oncardopenexternallink={handleCardExternalLink}
-                ></c-lres-kanban-card>
-            </template>
+  <section
+    class={sectionClass}
+    style={columnSectionStyle}
+    data-column-key={columnKey}
+    ondragover={handleDragOver}
+    ondragenter={handleDragEnter}
+    ondragleave={handleDragLeave}
+    ondrop={handleDrop}
+  >
+    <header class="kanban-column_header">
+      <div class="kanban-column_header-row">
+        <span class="kanban-column_title">{columnLabel}</span>
+        <span class="kanban-column_count">{columnCount}</span>
+      </div>
+      <template if:true={hasSummaries}>
+        <div class="kanban-column_summaries">
+          <template for:each={columnSummaries} for:item="summary">
+            <div key={summary.key} class="kanban-column_summary-row">
+              <span class="kanban-column_summary-label">{summary.label}</span>
+              <span class="kanban-column_summary-value">{summary.value}</span>
+            </div>
+          </template>
         </div>
-    </section>
+      </template>
+    </header>
+    <div class={bodyClass} style={columnBodyStyle}>
+      <template for:each={columnRecords} for:item="card">
+        <c-lres-kanban-card
+          key={card.id}
+          card={card}
+          column-key={columnKey}
+          show-card-field-labels={showCardFieldLabels}
+          dragged-record-id={draggedRecordId}
+          drag-disabled={dragDisabled}
+          oncardopenexternallink={handleCardExternalLink}
+        ></c-lres-kanban-card>
+      </template>
+    </div>
+  </section>
 </template>
