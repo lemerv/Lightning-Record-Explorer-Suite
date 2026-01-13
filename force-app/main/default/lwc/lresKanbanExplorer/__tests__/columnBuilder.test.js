@@ -143,4 +143,113 @@ describe("columnBuilder.buildColumns", () => {
       { key: "Amount|MIN|Minimum", label: "Minimum", value: "10" }
     ]);
   });
+
+  it("supports min/max summaries for date fields", () => {
+    const options = {
+      ...baseOptions,
+      summaryDefinitions: [
+        {
+          fieldApiName: "CloseDate",
+          summaryType: "MIN",
+          label: "Earliest",
+          dataType: "date"
+        },
+        {
+          fieldApiName: "CloseDate",
+          summaryType: "MAX",
+          label: "Latest",
+          dataType: "date"
+        }
+      ],
+      coerceSummaryValue: (record, summary) => record[summary.fieldApiName],
+      formatSummaryValue: (_summary, value) => {
+        if (value === null || value === undefined) {
+          return "";
+        }
+        return String(value);
+      },
+      getSummaryCurrencyCode: () => null
+    };
+    const records = [
+      {
+        id: "1",
+        Status: "A",
+        Title: "Alpha",
+        Detail: "One",
+        CloseDate: "2024-02-01"
+      },
+      {
+        id: "2",
+        Status: "A",
+        Title: "Beta",
+        Detail: "Two",
+        CloseDate: "2024-01-10"
+      }
+    ];
+
+    const columns = buildColumns(records, options);
+    const column = columns.find((col) => col.key === "A");
+    expect(column.summaries).toEqual([
+      { key: "CloseDate|MIN|Earliest", label: "Earliest", value: "2024-01-10" },
+      { key: "CloseDate|MAX|Latest", label: "Latest", value: "2024-02-01" }
+    ]);
+  });
+
+  it("supports count summaries for checkbox fields", () => {
+    const options = {
+      ...baseOptions,
+      summaryDefinitions: [
+        {
+          fieldApiName: "IsClosed",
+          summaryType: "COUNT_TRUE",
+          label: "Closed",
+          dataType: "boolean"
+        },
+        {
+          fieldApiName: "IsClosed",
+          summaryType: "COUNT_FALSE",
+          label: "Open",
+          dataType: "boolean"
+        }
+      ],
+      coerceSummaryValue: (record, summary) => record[summary.fieldApiName],
+      formatSummaryValue: (_summary, value) => {
+        if (value === null || value === undefined) {
+          return "";
+        }
+        return String(value);
+      },
+      getSummaryCurrencyCode: () => null
+    };
+    const records = [
+      {
+        id: "1",
+        Status: "A",
+        Title: "Alpha",
+        Detail: "One",
+        IsClosed: true
+      },
+      {
+        id: "2",
+        Status: "A",
+        Title: "Beta",
+        Detail: "Two",
+        IsClosed: false
+      },
+      {
+        id: "3",
+        Status: "A",
+        Title: "Gamma",
+        Detail: "Three",
+        IsClosed: true
+      }
+    ];
+
+    const columns = buildColumns(records, options);
+    const column = columns.find((col) => col.key === "A");
+    expect(column.summaries).toEqual([
+      { key: "IsClosed|COUNT_TRUE|Closed", label: "Closed", value: "2" },
+      { key: "IsClosed|COUNT_FALSE|Open", label: "Open", value: "1" }
+    ]);
+  });
 });

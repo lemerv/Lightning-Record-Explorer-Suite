@@ -1178,6 +1178,8 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
       "percent",
       "number"
     ]);
+    const dateTypes = new Set(["date", "datetime"]);
+    const booleanTypes = new Set(["boolean"]);
 
     summaries.forEach((summary) => {
       const qualifiedField = this.qualifyFieldName(summary.fieldApiName);
@@ -1195,16 +1197,34 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
         return;
       }
       const dataType = normalizeString(metadata.dataType || metadata.type);
-      if (!dataType || !numericTypes.has(dataType.toLowerCase())) {
+      if (!dataType) {
         validationWarnings.push(
-          `Summary field "${summary.fieldApiName}" is not a number or currency field.`
+          `Summary field "${summary.fieldApiName}" has no supported data type.`
+        );
+        return;
+      }
+      const normalizedType = dataType.toLowerCase();
+      const summaryType = summary.summaryType;
+      const isNumericSummary = summaryType === "SUM" || summaryType === "AVG";
+      const isMinMaxSummary = summaryType === "MIN" || summaryType === "MAX";
+      const isCountSummary =
+        summaryType === "COUNT_TRUE" || summaryType === "COUNT_FALSE";
+      if (
+        (isNumericSummary && !numericTypes.has(normalizedType)) ||
+        (isMinMaxSummary &&
+          !numericTypes.has(normalizedType) &&
+          !dateTypes.has(normalizedType)) ||
+        (isCountSummary && !booleanTypes.has(normalizedType))
+      ) {
+        validationWarnings.push(
+          `Summary field "${summary.fieldApiName}" is not valid for ${summaryType}.`
         );
         return;
       }
       validSummaries.push({
         ...summary,
         fieldApiName: qualifiedField,
-        dataType: dataType.toLowerCase(),
+        dataType: normalizedType,
         scale: metadata.scale,
         precision: metadata.precision
       });
@@ -1993,6 +2013,8 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
       fallbackSortField,
       sortDirection: this.sortDirection,
       cardFieldIcons: this.cardFieldIconsList,
+      dateTimeFormat: this.effectiveDateTimeFormat,
+      patternTokenCache: this.patternTokenCache,
       summaryDefinitions: this.summaryDefinitions,
       shouldDisplayParentReferenceOnCards:
         this.shouldDisplayParentReferenceOnCards,

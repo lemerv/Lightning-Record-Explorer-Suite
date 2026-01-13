@@ -93,7 +93,7 @@
         name="columnSummariesDefinition"
         type="String"
         label="Column Summaries Definition"
-        description="Use this field to define up to 3 column summaries. Format is `[FieldApiName|SUMMARY_TYPE|Label]` and entries are separated by semicolons. Summary types: SUM, AVG, MIN, MAX. Example: `[Amount|SUM|Sum of amount];[Amount|AVG|Average amount]`. Fields must be numeric (Number, Currency, Percent, Integer, Double)."
+        description="Use this field to define up to 3 column summaries. Format is `[FieldApiName|SUMMARY_TYPE|Label]` and entries are separated by semicolons. Summary types: SUM, AVG, MIN, MAX, COUNT_TRUE, COUNT_FALSE. Example: `[Amount|SUM|Sum of amount];[Amount|AVG|Average amount]`. SUM/AVG require numeric fields (Number, Currency, Percent, Integer, Double). MIN/MAX allow numeric or Date/DateTime fields. COUNT_TRUE/COUNT_FALSE require Checkbox (Boolean) fields."
       />
             <property
         name="cardFieldIcons"

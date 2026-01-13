@@ -26,6 +26,8 @@ export function buildColumns(records = [], options = {}) {
     sanitizeFieldOutput = (value) => value,
     getFieldMetadata = () => null,
     getUiPicklistValues,
+    dateTimeFormat,
+    patternTokenCache,
     summaryDefinitions = [],
     coerceSummaryValue = () => null,
     formatSummaryValue = () => "",
@@ -122,7 +124,9 @@ export function buildColumns(records = [], options = {}) {
       coerceSummaryValue,
       formatSummaryValue,
       getSummaryCurrencyCode,
-      columnLabel: lane.label
+      columnLabel: lane.label,
+      dateTimeFormat,
+      patternTokenCache
     });
     lane.summaries = summaries;
     lane.summaryWarnings = warnings;
@@ -214,7 +218,9 @@ function buildLaneSummaries(entries, options = {}) {
     coerceSummaryValue = () => null,
     formatSummaryValue = () => "",
     getSummaryCurrencyCode = () => null,
-    columnLabel
+    columnLabel,
+    dateTimeFormat,
+    patternTokenCache
   } = options;
 
   if (!Array.isArray(summaryDefinitions) || summaryDefinitions.length === 0) {
@@ -261,7 +267,45 @@ function buildLaneSummaries(entries, options = {}) {
       return;
     }
     let result = null;
-    if (summary.summaryType === "SUM") {
+    if (summary.summaryType === "COUNT_TRUE") {
+      result = values.filter((value) => value === true).length;
+    } else if (summary.summaryType === "COUNT_FALSE") {
+      result = values.filter((value) => value === false).length;
+    } else if (
+      summary.summaryType === "MIN" &&
+      (summary.dataType === "date" || summary.dataType === "datetime")
+    ) {
+      let best = null;
+      let bestTime = null;
+      values.forEach((value) => {
+        const time = new Date(value).getTime();
+        if (Number.isNaN(time)) {
+          return;
+        }
+        if (bestTime === null || time < bestTime) {
+          bestTime = time;
+          best = value;
+        }
+      });
+      result = best;
+    } else if (
+      summary.summaryType === "MAX" &&
+      (summary.dataType === "date" || summary.dataType === "datetime")
+    ) {
+      let best = null;
+      let bestTime = null;
+      values.forEach((value) => {
+        const time = new Date(value).getTime();
+        if (Number.isNaN(time)) {
+          return;
+        }
+        if (bestTime === null || time > bestTime) {
+          bestTime = time;
+          best = value;
+        }
+      });
+      result = best;
+    } else if (summary.summaryType === "SUM") {
       result = values.reduce((total, value) => total + value, 0);
     } else if (summary.summaryType === "AVG") {
       const total = values.reduce((sum, value) => sum + value, 0);
@@ -292,7 +336,9 @@ function buildLaneSummaries(entries, options = {}) {
       label: summary.label,
       value: formatSummaryValue(summary, result, {
         currencyCode,
-        useNarrowCurrencySymbol
+        useNarrowCurrencySymbol,
+        dateTimeFormat,
+        patternTokenCache
       })
     });
   });

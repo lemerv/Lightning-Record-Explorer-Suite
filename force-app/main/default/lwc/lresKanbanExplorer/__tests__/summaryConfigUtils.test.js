@@ -56,6 +56,7 @@ describe("summaryConfigUtils.parseSummaryDefinitions", () => {
 describe("summaryConfigUtils.normalizeSummaryType", () => {
   it("normalizes supported types", () => {
     expect(normalizeSummaryType("sum")).toBe("SUM");
+    expect(normalizeSummaryType("count_true")).toBe("COUNT_TRUE");
   });
 
   it("returns null for unsupported types", () => {

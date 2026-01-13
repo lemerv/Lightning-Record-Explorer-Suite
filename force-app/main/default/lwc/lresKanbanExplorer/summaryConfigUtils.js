@@ -1,4 +1,11 @@
-const SUMMARY_TYPES = new Set(["SUM", "AVG", "MIN", "MAX"]);
+const SUMMARY_TYPES = new Set([
+  "SUM",
+  "AVG",
+  "MIN",
+  "MAX",
+  "COUNT_TRUE",
+  "COUNT_FALSE"
+]);
 const MAX_SUMMARIES = 3;
 
 export function parseSummaryDefinitions(rawValue) {

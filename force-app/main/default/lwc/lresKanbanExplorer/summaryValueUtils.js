@@ -1,3 +1,5 @@
+import { formatValueWithPattern } from "c/lresDateTimeUtils";
+
 export function coerceNumericValue(rawValue) {
   if (rawValue === null || rawValue === undefined || rawValue === "") {
     return null;
@@ -10,6 +12,23 @@ export function coerceNumericValue(rawValue) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+export function coerceBooleanValue(rawValue) {
+  if (rawValue === null || rawValue === undefined || rawValue === "") {
+    return null;
+  }
+  if (typeof rawValue === "boolean") {
+    return rawValue;
+  }
+  const normalized = String(rawValue).trim().toLowerCase();
+  if (normalized === "true") {
+    return true;
+  }
+  if (normalized === "false") {
+    return false;
+  }
+  return null;
+}
+
 export function coerceSummaryValue(record, summary, extractFieldData) {
   if (
     !record ||
@@ -19,7 +38,15 @@ export function coerceSummaryValue(record, summary, extractFieldData) {
     return null;
   }
   const data = extractFieldData(record, summary.fieldApiName);
-  return coerceNumericValue(data?.raw ?? null);
+  const raw = data?.raw ?? data?.display ?? null;
+  const dataType = summary?.dataType;
+  if (dataType === "date" || dataType === "datetime") {
+    return raw;
+  }
+  if (dataType === "boolean") {
+    return coerceBooleanValue(raw);
+  }
+  return coerceNumericValue(raw);
 }
 
 export function resolveCurrencyCode(
@@ -71,7 +98,19 @@ export function resolveCurrencyCode(
 }
 
 export function formatSummaryValue(summary, value, options = {}) {
-  if (value === null || value === undefined || !Number.isFinite(value)) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  if (summary?.dataType === "date" || summary?.dataType === "datetime") {
+    return (
+      formatValueWithPattern(value, {
+        dateOnly: summary.dataType === "date",
+        pattern: options.dateTimeFormat,
+        patternTokenCache: options.patternTokenCache
+      }) || ""
+    );
+  }
+  if (!Number.isFinite(value)) {
     return "";
   }
   let normalizedValue = value;
