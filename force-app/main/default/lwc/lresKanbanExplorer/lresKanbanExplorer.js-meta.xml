@@ -156,7 +156,7 @@
         name="dateTimeFormat"
         type="String"
         label="Date and Time Format"
-        description="Java SimpleDateFormat pattern applied to date and datetime fields (for example, dd/MM/yyyy h:mm a). Leave blank to use the default dd/MM/yyyy h:mm a format."
+        description="Java SimpleDateFormat pattern applied to date and datetime fields (for example, dd/MM/yyyy h:mm a). Leave blank to use the running user's Salesforce locale."
       />
             <property
         name="debugLogging"

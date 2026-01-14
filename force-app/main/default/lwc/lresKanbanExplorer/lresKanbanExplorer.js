@@ -115,7 +115,6 @@ import {
 import KanbanRecordModal from "c/lresKanbanRecordModal";
 const DEFAULT_EMPTY_LABEL = "No Value";
 const MASTER_RECORD_TYPE_ID = "012000000000000AAA";
-const DEFAULT_DATETIME_FORMAT = "dd/MM/yyyy h:mm a";
 const SUPPORTED_GROUPING_FIELD_TYPES = new Set(["picklist", "string"]);
 
 export default class KanbanExplorer extends NavigationMixin(LightningElement) {
@@ -537,8 +536,8 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
   }
 
   /**
-   * Custom date/time pattern applied to formatted values, falling back to
-   * `DEFAULT_DATETIME_FORMAT` when undefined.
+   * Custom date/time pattern applied to formatted values. When undefined,
+   * the running user's locale settings are used instead.
    *
    * @returns {string|null} Luxon-compatible format string.
    */
@@ -560,7 +559,7 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
     }
     this._dateTimeFormat = normalized;
     this.logDebug("dateTimeFormat changed.", {
-      format: this._dateTimeFormat || DEFAULT_DATETIME_FORMAT
+      format: this._dateTimeFormat || "locale-default"
     });
     this.patternTokenCache.clear();
     this.buildFilterDefinitions(this.relatedRecords || []);
@@ -1319,7 +1318,7 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
   }
 
   get effectiveDateTimeFormat() {
-    return this._dateTimeFormat || DEFAULT_DATETIME_FORMAT;
+    return this._dateTimeFormat;
   }
 
   get cardFieldsQualified() {

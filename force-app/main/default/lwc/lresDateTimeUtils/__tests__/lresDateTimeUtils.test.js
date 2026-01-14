@@ -69,11 +69,12 @@ describe("lresDateTimeUtils", () => {
       expect(result).toBeNull();
     });
 
-    test("should return null for invalid pattern", () => {
+    test("should fall back to locale formatting when pattern is missing", () => {
       const result = formatValueWithPattern(TEST_DATE, {
         pattern: null
       });
-      expect(result).toBeNull();
+      expect(result).toBeDefined();
+      expect(typeof result).toBe("string");
     });
 
     test("should handle custom locale and timezone", () => {

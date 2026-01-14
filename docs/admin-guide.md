@@ -263,9 +263,11 @@ Use these configuration fields to control _which_ Parent records are available i
 - **Purpose**: Custom date/time display format
 - **Format**: Java SimpleDateFormat pattern
 - **Examples**:
-  - `dd/MM/yyyy h:mm a` (default)
+  - `dd/MM/yyyy h:mm a`
   - `MM-dd-yy HH:mm`
   - `EEEE, MMMM d, yyyy`
+- **Notes**:
+  - Leave blank to use the running user's Salesforce locale settings
 
 #### Debug Logging <!-- omit from toc -->
 
