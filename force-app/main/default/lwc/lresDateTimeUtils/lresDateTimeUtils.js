@@ -3,6 +3,7 @@ import TIME_ZONE from "@salesforce/i18n/timeZone";
 
 const DEFAULT_LOCALE = LOCALE || "en-US";
 const DEFAULT_TIME_ZONE = TIME_ZONE || "UTC";
+const DEFAULT_TIME_PATTERN = " h:mm a";
 export const CONNECTOR_LITERAL_PATTERN = /^[\s:,/-]+$/;
 export const TIME_TOKEN_CHARS = new Set([
   "H",
@@ -17,6 +18,17 @@ export const TIME_TOKEN_CHARS = new Set([
   "M",
   "d",
   "E",
+  "z"
+]);
+const TIME_ONLY_TOKEN_CHARS = new Set([
+  "H",
+  "h",
+  "K",
+  "k",
+  "m",
+  "s",
+  "S",
+  "a",
   "z"
 ]);
 
@@ -37,9 +49,19 @@ export function formatValueWithPattern(
   if (!parts) {
     return null;
   }
-  const formatted = applyDateTimePattern(parts, pattern, {
+  const tokens = getPatternTokens(pattern, patternTokenCache);
+  if (!tokens.length) {
+    return null;
+  }
+  const normalizedTokens = normalizeTokensForDataType(tokens, {
     dateOnly,
     patternTokenCache
+  });
+  if (!normalizedTokens.length) {
+    return null;
+  }
+  const formatted = applyDateTimePatternTokens(parts, normalizedTokens, {
+    dateOnly
   });
   if (!formatted) {
     return null;
@@ -228,6 +250,10 @@ export function applyDateTimePattern(
   if (!tokens.length) {
     return null;
   }
+  return applyDateTimePatternTokens(parts, tokens, { dateOnly });
+}
+
+function applyDateTimePatternTokens(parts, tokens, { dateOnly = false } = {}) {
   let result = "";
   let hasOutput = false;
   for (let i = 0; i < tokens.length; i += 1) {
@@ -331,6 +357,43 @@ function getPatternTokens(pattern, patternTokenCache) {
   }
   cache.set(pattern, tokens);
   return tokens;
+}
+
+function normalizeTokensForDataType(
+  tokens,
+  { dateOnly = false, patternTokenCache } = {}
+) {
+  if (!tokens.length) {
+    return [];
+  }
+  if (dateOnly) {
+    const filtered = [];
+    for (let i = 0; i < tokens.length; i += 1) {
+      const token = tokens[i];
+      if (isTimeToken(token)) {
+        continue;
+      }
+      if (token.type === "literal") {
+        const prevIsTime = isTimeToken(tokens[i - 1]);
+        const nextIsTime = isTimeToken(tokens[i + 1]);
+        if (prevIsTime || nextIsTime) {
+          continue;
+        }
+      }
+      filtered.push(token);
+    }
+    return filtered;
+  }
+  const hasTimeTokens = tokens.some((token) => isTimeToken(token));
+  if (hasTimeTokens) {
+    return tokens;
+  }
+  const timeTokens = getPatternTokens(DEFAULT_TIME_PATTERN, patternTokenCache);
+  return tokens.concat(timeTokens);
+}
+
+function isTimeToken(token) {
+  return token?.type === "token" && TIME_ONLY_TOKEN_CHARS.has(token.value[0]);
 }
 
 function hasFutureTokenOutput(

@@ -40,6 +40,21 @@ describe("lresDateTimeUtils", () => {
       expect(result).toBe("2023-12-25 14:30:45");
     });
 
+    test("should drop time tokens for date-only fields", () => {
+      const result = formatValueWithPattern(TEST_DATE_ONLY_STRING, {
+        pattern: "yyyy-MM-dd HH:mm:ss",
+        dateOnly: true
+      });
+      expect(result).toBe("2023-12-25");
+    });
+
+    test("should append time tokens for datetime fields when missing", () => {
+      const result = formatValueWithPattern(TEST_DATE, {
+        pattern: "yyyy-MM-dd"
+      });
+      expect(result).toBe("2023-12-25 2:30 PM");
+    });
+
     test("should format date string with date-only pattern", () => {
       const result = formatValueWithPattern(TEST_DATE_ONLY_STRING, {
         pattern: "MM/dd/yyyy",
@@ -92,7 +107,7 @@ describe("lresDateTimeUtils", () => {
         pattern: "yyyy-MM-dd HH:mm:ss",
         dateOnly: true
       });
-      expect(result).toBe("2023-12-25 00:00:00");
+      expect(result).toBe("2023-12-25");
     });
 
     test("should use pattern token cache", () => {
@@ -101,8 +116,8 @@ describe("lresDateTimeUtils", () => {
         pattern: "yyyy-MM-dd",
         patternTokenCache: cache
       });
-      expect(result).toBe("2023-12-25");
-      expect(cache.size).toBe(1);
+      expect(result).toBe("2023-12-25 2:30 PM");
+      expect(cache.size).toBe(2);
     });
   });
 
@@ -566,7 +581,7 @@ describe("lresDateTimeUtils", () => {
       const result = formatValueWithPattern(leapYearDate, {
         pattern: "yyyy-MM-dd"
       });
-      expect(result).toBe("2024-02-29");
+      expect(result).toBe("2024-02-29 12:00 PM");
     });
 
     test("should handle end of year date", () => {
@@ -638,7 +653,7 @@ describe("lresDateTimeUtils", () => {
       const result = formatValueWithPattern(TEST_DATE, {
         pattern: "MMM dd, yyyy"
       });
-      expect(result).toBe("Dec 25, 2023");
+      expect(result).toBe("Dec 25, 2023 2:30 PM");
     });
 
     test("should format for API requests", () => {
