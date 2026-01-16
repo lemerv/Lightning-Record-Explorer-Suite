@@ -150,6 +150,7 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
   sortDirection = "asc";
 
   filterDefinitions = [];
+  filtersDirty = true;
   activeFilterMenuId = null;
   isSortMenuOpen = false;
   searchValue = "";
@@ -562,6 +563,7 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
       format: this._dateTimeFormat || "locale-default"
     });
     this.patternTokenCache.clear();
+    this.filtersDirty = true;
     this.buildFilterDefinitions(this.relatedRecords || []);
     this.rebuildColumnsWithPicklist();
   }
@@ -966,6 +968,7 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
       previousRecordCount: this.relatedRecords?.length || 0,
       nextRecordCount: dataset.length
     });
+    this.filtersDirty = true;
     this.relatedRecords = dataset;
     const groupingField = this.groupingFieldQualified;
     const cardFields = this.cardFieldsQualified;
@@ -1255,6 +1258,7 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
         defaultRecordTypeId: data.defaultRecordTypeId
       });
       this.refreshSummaryDefinitions();
+      this.filtersDirty = true;
       this.rebuildColumnsWithPicklist();
     } else if (error) {
       this.objectInfo = undefined;
@@ -1276,6 +1280,7 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
         fieldCount: Object.keys(this.picklistFieldValues || {}).length,
         recordTypeId: this.effectiveRecordTypeId
       });
+      this.filtersDirty = true;
       this.rebuildColumnsWithPicklist();
     } else if (error) {
       this.picklistFieldValues = undefined;

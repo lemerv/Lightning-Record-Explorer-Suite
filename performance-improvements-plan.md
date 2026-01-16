@@ -3,9 +3,18 @@
 ## 0) Implementation instructions (global)
 
 - Only implement one item at a time. Confirm with me that I am happy with your work and happy to start the next item before moving on
-- Always run `npm run test`, `npm run lint`, and `npm run prettier:verify` at the end of each task and verify all tests pass and changes a ready to commit
-- Document what you actually implemented in a "Implemented Solution" section for each item, calling out any differences from the items plan
-- Once I confirm that an item is complete, mark is "Completed" and ask if I want to start the next one
+- Before starting to implement an item, re-evaluate the item's plan considering what has actually been implemented for previous items. Based on what you implement for previous items, if there is any part of the current item's plan that you now think could/should change as a result, then call it out. If not, then state as much
+- Always run `npm run test`, `npm run lint`, and `npm run prettier:verify` at the end of each task and verify all tests pass and changes a ready to commit. If any of these fail, then fix them without affecting the tests (eg don't just remove or bypass a test because that is easier, actually fix it)
+- If `npm run lint` fails due to its glob/patterns, run `npx eslint` on the staged/changed files to ensure lint errors are still caught.
+- After running the test/lint/prettier checks, validate a deployment based on tracked changes with `sf project deploy start --source-dir force-app --dry-run`. If validation fails, fix the issues without compromising the intent of the item’s solution
+- Add a small line of text in the board UI with a unique 3-word combo (e.g., `lion-pear-car`) so I can verify I’m on the latest deploy. Each time you edit any code, change this value and tell me to deploy and what the new value is.
+- Once above tests pass, then I will deploy it and test in my org. State how I should test it and what performance improvement I should notice
+- Once I state I am happy with the changes, document what you actually implemented in a "Implemented Solution" section for each item, calling out any differences from the items plan
+- Once I confirm that an item is complete, mark is "Completed", write a short commit message and remind me to commit changes, and then ask if I want to start the next one
+
+## Cleanup
+
+- Remove the 3-word UI version string when we’re done.
 
 ## Tracking (lightweight)
 
@@ -23,7 +32,7 @@
 
 Please continue item 8 (virtualize cards per column) and item 9 (server-side filtering/search/pagination) in performance-improvements-plan.md. For each item, restate the item in plain English, ask if I understand it or want clarifications, then ask one implementation question at a time with an explainer. Keep going until you’re 95% confident.
 
-## 1) Item: Skip full filter-definition rebuilds when records are unchanged
+## 1) Item: Skip full filter-definition rebuilds when records are unchanged (Completed)
 
 **What it is**
 Filter definitions are the data objects that drive the filter dropdowns (field, options, selected values, open state, button class). Today they are rebuilt by scanning the full `relatedRecords` dataset every time `rebuildColumnsWithPicklist()` runs.
@@ -64,6 +73,13 @@ Rebuild filter definitions only when the record snapshot or filter field configu
 
 - Stale filter options if the snapshot change isn’t detected correctly.
 - Filters that depend on display formatting (e.g., date/time format changes) may also need to mark filters as dirty.
+
+### Implemented Solution
+
+- Added `filtersDirty` tracking on the component, set to `true` on config changes, record snapshots, date/time format updates, and metadata (object/picklist) reloads.
+- Updated `boardInteractions.buildFilterDefinitions()` to skip rebuilds when filters are clean, performing a lightweight UI sync (selection flags, button classes, open state, and stale selection pruning) and logging rebuilt vs skipped.
+- Ensured filter rebuilds clear the dirty flag and keep menu outside-click listener state aligned.
+- Added a unit test to confirm clean-filter sync behavior and stale selection pruning.
 
 ## 2) Item: Make search debounce trailing-only and remove duplicate event triggers
 

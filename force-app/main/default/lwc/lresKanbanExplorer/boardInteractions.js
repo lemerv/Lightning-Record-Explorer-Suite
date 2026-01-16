@@ -4,6 +4,13 @@ import { buildFilterDefinitions as buildFilterDefinitionsUtil } from "./filterUt
 import { sanitizeFieldOutput } from "c/lresOutputUtils";
 
 export function buildFilterDefinitions(component, records) {
+  if (component.filtersDirty === false) {
+    syncFilterDefinitions(component);
+    component.logDebug("Filter definitions skipped; filters are clean.", {
+      filterCount: component.filterDefinitions?.length || 0
+    });
+    return;
+  }
   const { definitions, activeFilterMenuId, shouldCloseMenus } =
     buildFilterDefinitionsUtil({
       records: records || [],
@@ -26,9 +33,43 @@ export function buildFilterDefinitions(component, records) {
   if (shouldCloseMenus) {
     component.unregisterMenuOutsideClick();
   }
-  component.logDebug("Filter definitions updated.", {
+  component.filtersDirty = false;
+  component.logDebug("Filter definitions rebuilt.", {
     filterCount: component.filterDefinitions.length
   });
+}
+
+function syncFilterDefinitions(component) {
+  const activeFilterMenuId = component.activeFilterMenuId;
+  let activeMenuExists = false;
+  const definitions = (component.filterDefinitions || []).map((def) => {
+    const options = Array.isArray(def.options) ? def.options : [];
+    const optionValues = new Set(options.map((option) => option.value));
+    const selectedValues = (def.selectedValues || []).filter((value) =>
+      optionValues.has(value)
+    );
+    const hasSelection = selectedValues.length > 0;
+    const isOpen = def.id === activeFilterMenuId;
+    if (isOpen) {
+      activeMenuExists = true;
+    }
+    return {
+      ...def,
+      selectedValues,
+      options: options.map((option) => ({
+        ...option,
+        selected: selectedValues.includes(option.value)
+      })),
+      isOpen,
+      buttonClass: getFilterButtonClass(component, def.id, hasSelection)
+    };
+  });
+
+  component.filterDefinitions = definitions;
+  component.activeFilterMenuId = activeMenuExists ? activeFilterMenuId : null;
+  if (!component.activeFilterMenuId && !component.isSortMenuOpen) {
+    component.unregisterMenuOutsideClick();
+  }
 }
 
 export function getFilterBlueprints(component) {
@@ -661,6 +702,7 @@ export function debounce(fn, delayMs = 200) {
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
     timeoutId = setTimeout(() => {
       timeoutId = null;
       if (!shouldInvokeImmediately && pendingArgs) {
@@ -707,7 +749,6 @@ export async function updateRecordGrouping(
 
   component.isLoading = true;
   if (component._debugLoggingEnabled) {
-    // eslint-disable-next-line no-console
     console.log("[KanbanExplorer][Debug] updateRecordGrouping", {
       recordId,
       sourceColumnKey,

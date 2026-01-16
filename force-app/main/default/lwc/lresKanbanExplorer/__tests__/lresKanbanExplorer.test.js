@@ -3,6 +3,7 @@ import KanbanExplorer from "c/lresKanbanExplorer";
 import fetchRelatedCardRecords from "@salesforce/apex/LRES_KanbanCardRecordsController.fetchRelatedCardRecords";
 import fetchParentlessCardRecords from "@salesforce/apex/LRES_KanbanCardRecordsController.fetchParentlessCardRecords";
 import { updateRecord } from "lightning/uiRecordApi";
+import { buildFilterDefinitions as buildFilterDefinitionsInteractions } from "../boardInteractions";
 import {
   getObjectInfo,
   getPicklistValuesByRecordType
@@ -66,6 +67,7 @@ describe("c-lres-kanban-explorer", () => {
     const element = createElement("c-lres-kanban-explorer", {
       is: KanbanExplorer
     });
+    element.logDebug = jest.fn();
     element.debugLogging = false;
     element.cardObjectApiName = "Opportunity";
     element.groupingFieldApiName = "Status__c";
@@ -460,5 +462,44 @@ describe("c-lres-kanban-explorer", () => {
       clearedFilter.options.every((option) => option.selected === false)
     ).toBe(true);
     expect(clearedFilter.buttonClass).toBe("filter-dropdown_button");
+  });
+
+  it("syncs filter UI state when filters are clean", () => {
+    const component = {
+      logDebug: jest.fn(),
+      filtersDirty: false,
+      isSortMenuOpen: false,
+      activeFilterMenuId: "Missing",
+      filterDefinitions: [
+        {
+          id: "Status__c",
+          field: "Status__c",
+          label: "Status",
+          selectedValues: ["Open", "Stale"],
+          options: [
+            { value: "Open", label: "Open", selected: false },
+            { value: "Closed", label: "Closed", selected: true }
+          ],
+          isOpen: true,
+          buttonClass: "filter-dropdown_button"
+        }
+      ],
+      unregisterMenuOutsideClick: jest.fn()
+    };
+
+    buildFilterDefinitionsInteractions(component, []);
+
+    const syncedFilter = component.filterDefinitions[0];
+    expect(component.activeFilterMenuId).toBeNull();
+    expect(syncedFilter.isOpen).toBe(false);
+    expect(syncedFilter.selectedValues).toEqual(["Open"]);
+    expect(syncedFilter.options).toEqual([
+      { value: "Open", label: "Open", selected: true },
+      { value: "Closed", label: "Closed", selected: false }
+    ]);
+    expect(syncedFilter.buttonClass).toBe(
+      "filter-dropdown_button filter-dropdown_button--active"
+    );
+    expect(component.unregisterMenuOutsideClick).toHaveBeenCalled();
   });
 });

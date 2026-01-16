@@ -1,5 +1,6 @@
 <template>
   <lightning-card title={resolvedBoardTitle} icon-name="standard:kanban">
+    <div class="kanban-version">violet-pine-stag</div>
     <template if:true={actionsAvailable}>
       <c-lres-kanban-board-actions
         slot="actions"

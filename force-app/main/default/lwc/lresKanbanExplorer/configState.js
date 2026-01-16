@@ -9,6 +9,7 @@ function scheduleParentSelectionRefresh(component) {
   if (component._parentSelectionRefreshTimeout) {
     clearTimeout(component._parentSelectionRefreshTimeout);
   }
+  // eslint-disable-next-line @lwc/lwc/no-async-operation
   component._parentSelectionRefreshTimeout = setTimeout(() => {
     component._parentSelectionRefreshTimeout = null;
     component.performCardRecordsRefresh().catch(() => {
@@ -18,6 +19,7 @@ function scheduleParentSelectionRefresh(component) {
 }
 
 export function handleConfigChange(component) {
+  component.filtersDirty = true;
   component._dataModeCache = null;
   component.logDebug("handleConfigChange invoked.", {
     hasRequiredConfig: component.hasRequiredConfig,
@@ -124,10 +126,7 @@ export function normalizeParentSelection(component, values) {
       normalized.push(id);
     }
   });
-  if (
-    !component._defaultToMultipleParentSelection &&
-    normalized.length > 1
-  ) {
+  if (!component._defaultToMultipleParentSelection && normalized.length > 1) {
     return normalized.slice(0, 1);
   }
   return normalized;
