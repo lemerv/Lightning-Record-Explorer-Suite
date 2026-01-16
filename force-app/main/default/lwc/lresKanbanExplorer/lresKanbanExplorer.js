@@ -34,7 +34,6 @@ import {
   handleManualRefresh as handleManualRefreshInteractions,
   handleParentViewClick as handleParentViewClickInteractions,
   handleSearchInput as handleSearchInputInteractions,
-  handleSearchKeyup as handleSearchKeyupInteractions,
   clearDebouncedSearch as clearDebouncedSearchInteractions,
   handleSortDirectionToggle as handleSortDirectionToggleInteractions,
   handleSortMenuClick as handleSortMenuClickInteractions,
@@ -1826,10 +1825,6 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
 
   handleSearchInput(event) {
     return handleSearchInputInteractions(this, event);
-  }
-
-  handleSearchKeyup(event) {
-    return handleSearchKeyupInteractions(this, event);
   }
 
   applySearchValue(rawValue) {

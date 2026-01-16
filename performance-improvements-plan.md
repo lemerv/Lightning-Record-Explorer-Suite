@@ -81,7 +81,7 @@ Rebuild filter definitions only when the record snapshot or filter field configu
 - Ensured filter rebuilds clear the dirty flag and keep menu outside-click listener state aligned.
 - Added a unit test to confirm clean-filter sync behavior and stale selection pruning.
 
-## 2) Item: Make search debounce trailing-only and remove duplicate event triggers
+## 2) Item: Make search debounce trailing-only and remove duplicate event triggers (Completed)
 
 **What it is**
 Switch search input handling to a trailing-only debounce and ensure only one event path triggers search updates (prefer `input` over both `input` + `keyup`).
@@ -117,6 +117,12 @@ Use a trailing-only debounce for search updates and wire a single event handler 
 
 - Slight delay before search updates (tune delay for usability).
 - No additional debug logging for debounce timing.
+
+### Implemented Solution
+
+- Switched search input wiring to a single `searchinput` path and added a safe `change` fallback to cover Lightning input event differences without double-firing.
+- Replaced the prior debounce with a trailing-only handler that normalizes the search value and only rebuilds after the debounce delay.
+- Updated unit tests for board actions search events and search debounce behavior, plus adjusted search filter test timing to wait for the trailing update.
 
 ## 3) Item: Coalesce heavy rebuilds into the next animation frame
 

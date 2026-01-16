@@ -4,6 +4,7 @@ import fetchRelatedCardRecords from "@salesforce/apex/LRES_KanbanCardRecordsCont
 import fetchParentlessCardRecords from "@salesforce/apex/LRES_KanbanCardRecordsController.fetchParentlessCardRecords";
 import { updateRecord } from "lightning/uiRecordApi";
 import { buildFilterDefinitions as buildFilterDefinitionsInteractions } from "../boardInteractions";
+import { handleSearchInput as handleSearchInputInteractions } from "../boardInteractions";
 import {
   getObjectInfo,
   getPicklistValuesByRecordType
@@ -249,11 +250,35 @@ describe("c-lres-kanban-explorer", () => {
         composed: true
       })
     );
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
+    await new Promise((resolve) => setTimeout(resolve, 220));
     await flushPromises();
     const filteredOpen = container.columns.find((col) => col.key === "Open");
     expect(filteredOpen.records).toHaveLength(1);
     const closedColumn = container.columns.find((col) => col.key === "Closed");
     expect(closedColumn.records).toHaveLength(0);
+  });
+
+  it("debounces search input with trailing-only updates", () => {
+    jest.useFakeTimers();
+    const component = {
+      searchValue: "",
+      logDebug: jest.fn(),
+      rebuildColumnsWithPicklist: jest.fn()
+    };
+
+    handleSearchInputInteractions(component, { detail: { value: "first" } });
+
+    expect(component.searchValue).toBe("");
+    expect(component.rebuildColumnsWithPicklist).not.toHaveBeenCalled();
+
+    handleSearchInputInteractions(component, { detail: { value: "second" } });
+    expect(component.rebuildColumnsWithPicklist).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(200);
+    expect(component.searchValue).toBe("second");
+    expect(component.rebuildColumnsWithPicklist).toHaveBeenCalledTimes(1);
+    jest.useRealTimers();
   });
 
   it("shows inline error when parent object is set without child relationship", async () => {
