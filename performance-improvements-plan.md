@@ -1,8 +1,11 @@
 # Performance Improvements Plan
 
-## 0) Implementation validation (global)
+## 0) Implementation instructions (global)
 
-- Got it — I’ll run `npm run test`, `npm run lint`, and `npm run prettier:verify` when we implement.
+- Only implement one item at a time. Confirm with me that I am happy with your work and happy to start the next item before moving on
+- Always run `npm run test`, `npm run lint`, and `npm run prettier:verify` at the end of each task and verify all tests pass and changes a ready to commit
+- Document what you actually implemented in a "Implemented Solution" section for each item, calling out any differences from the items plan
+- Once I confirm that an item is complete, mark is "Completed" and ask if I want to start the next one
 
 ## Tracking (lightweight)
 
