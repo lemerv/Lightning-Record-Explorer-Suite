@@ -29,7 +29,7 @@
 - Item 8: Completed
 - Item 9: Fully specified
 - Item 10: Completed
-- Item 11: Fully specified
+- Item 11: Completed
 - Item 12: Fully specified
 
 ## 1) Item: Skip full filter-definition rebuilds when records are unchanged (Completed)
@@ -477,7 +477,7 @@ Yes, low urgency. Do this if scheduler behavior will continue to evolve.
 - Extracted rebuild and summary scheduling into `schedulerUtils.js` with explicit helpers for user rebuild, RAF rebuild, and summary scheduling.
 - Updated the component to delegate scheduling to the helper while preserving existing timing behavior.
 
-#### 11) Item: Extract optimistic drag/drop column mutation helper
+#### 11) Item: Extract optimistic drag/drop column mutation helper (Completed)
 
 **What it is**
 Move the pure optimistic column move/revert logic out of `boardInteractions.js` into a helper function.
@@ -511,6 +511,11 @@ Yes, medium urgency if drag/drop behavior is expected to evolve; otherwise optio
 **Risks and edge cases**
 
 - Must ensure any future column shape changes remain aligned with the helper output.
+
+##### Implemented Solution
+
+- Extracted the optimistic column mutation logic into `dragDropUtils.js` as a pure helper.
+- Updated `boardInteractions.js` to delegate to the helper while keeping side effects in the component flow.
 
 #### 12) Item: Extract virtualization math into a helper (optional)
 
