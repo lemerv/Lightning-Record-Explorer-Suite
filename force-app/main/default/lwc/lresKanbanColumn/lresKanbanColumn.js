@@ -1,5 +1,9 @@
 import { LightningElement, api } from "lwc";
 import { normalizeBoolean } from "c/lresFieldUtils";
+import {
+  resolveSpacerHeights,
+  resolveVirtualWindow
+} from "./virtualizationUtils";
 
 const INITIAL_MEASURE_COUNT = 10;
 const VIRTUAL_BUFFER = 5;
@@ -113,18 +117,26 @@ export default class KanbanColumn extends LightningElement {
     if (!this.isWindowed) {
       return "";
     }
-    return `height: ${this._rowHeight * this._visibleStartIndex}px;`;
+    const { top } = resolveSpacerHeights({
+      rowHeight: this._rowHeight,
+      startIndex: this._visibleStartIndex,
+      endIndex: this._visibleEndIndex,
+      total: this.totalRecordCount
+    });
+    return `height: ${top}px;`;
   }
 
   get bottomSpacerStyle() {
     if (!this.isWindowed) {
       return "";
     }
-    const remaining = Math.max(
-      this.totalRecordCount - this._visibleEndIndex,
-      0
-    );
-    return `height: ${this._rowHeight * remaining}px;`;
+    const { bottom } = resolveSpacerHeights({
+      rowHeight: this._rowHeight,
+      startIndex: this._visibleStartIndex,
+      endIndex: this._visibleEndIndex,
+      total: this.totalRecordCount
+    });
+    return `height: ${bottom}px;`;
   }
 
   get sectionClass() {
@@ -201,21 +213,13 @@ export default class KanbanColumn extends LightningElement {
       return;
     }
     const totalCount = this.totalRecordCount;
-    if (!totalCount) {
-      this._visibleStartIndex = 0;
-      this._visibleEndIndex = 0;
-      return;
-    }
-    const safeTop = Number.isFinite(scrollTop) ? scrollTop : 0;
-    const safeHeight = Number.isFinite(viewportHeight) ? viewportHeight : 0;
-    const start = Math.max(
-      Math.floor(safeTop / this._rowHeight) - VIRTUAL_BUFFER,
-      0
-    );
-    const end = Math.min(
-      Math.ceil((safeTop + safeHeight) / this._rowHeight) + VIRTUAL_BUFFER,
-      totalCount
-    );
+    const { start, end } = resolveVirtualWindow({
+      scrollTop,
+      viewportHeight,
+      rowHeight: this._rowHeight,
+      totalCount,
+      buffer: VIRTUAL_BUFFER
+    });
     if (start === this._visibleStartIndex && end === this._visibleEndIndex) {
       return;
     }

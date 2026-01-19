@@ -30,7 +30,7 @@
 - Item 9: Fully specified
 - Item 10: Completed
 - Item 11: Completed
-- Item 12: Fully specified
+- Item 12: Completed
 
 ## 1) Item: Skip full filter-definition rebuilds when records are unchanged (Completed)
 
@@ -517,7 +517,7 @@ Yes, medium urgency if drag/drop behavior is expected to evolve; otherwise optio
 - Extracted the optimistic column mutation logic into `dragDropUtils.js` as a pure helper.
 - Updated `boardInteractions.js` to delegate to the helper while keeping side effects in the component flow.
 
-#### 12) Item: Extract virtualization math into a helper (optional)
+#### 12) Item: Extract virtualization math into a helper (optional) (Completed)
 
 **What it is**
 Move window range and spacer calculations into a pure helper used by `lresKanbanColumn.js`.
@@ -551,3 +551,8 @@ Optional. Do this only if virtualization is likely to grow in complexity.
 **Risks and edge cases**
 
 - Helper must remain lightweight to avoid making simple logic feel indirect.
+
+##### Implemented Solution
+
+- Extracted window range and spacer calculations into `virtualizationUtils.js`.
+- Updated the column component to delegate math to the helper while keeping DOM measurement and scroll handling in the component.
