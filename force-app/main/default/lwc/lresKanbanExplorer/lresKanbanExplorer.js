@@ -183,6 +183,9 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
   _rebuildColumnsRafId = null;
   _rebuildColumnsRafType = null;
   _userRebuildTimeoutId = null;
+  _summaryRebuildRafId = null;
+  _summaryRebuildRafType = null;
+  _summaryRebuildToken = 0;
 
   shouldAutoRefreshOnConfig() {
     return shouldAutoRefreshOnConfigService(this);
@@ -1076,6 +1079,7 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
     this.clearParentSelectionRefreshDebounce();
     this.cancelScheduledRebuildColumns();
     this.cancelScheduledUserRebuild();
+    this.cancelScheduledSummaryRebuild();
     clearDebouncedSearchInteractions(this);
   }
 
@@ -1149,15 +1153,33 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
    * @param {Array<string>} cardFields Fields rendered within each card (used for fallbacks).
    * @returns {Array<Object>} Array of column descriptors (key, label, records, count, etc).
    */
-  buildColumns(records, groupingField, cardFields = []) {
+  buildColumns(records, groupingField, cardFields = [], options = {}) {
     const resolvedCardFields = Array.isArray(cardFields) ? cardFields : [];
+    this.cancelScheduledSummaryRebuild();
+    const deferSummaries = options.deferSummaries !== false;
+    const shouldDeferSummaries =
+      deferSummaries && this.shouldDeferSummaries(records);
     const context = this.resolveColumnContext(
       groupingField,
       resolvedCardFields
     );
+    const summaryContext = {
+      ...context,
+      summaryDefinitions: shouldDeferSummaries ? [] : this.summaryDefinitions
+    };
     const callbacks = this.buildColumnCallbacks();
-    const options = this.buildColumnOptions(records, context, callbacks);
-    const columns = buildColumnsUtil(records || [], options);
+    const buildOptions = this.buildColumnOptions(
+      records,
+      summaryContext,
+      callbacks
+    );
+    const columns = buildColumnsUtil(records || [], buildOptions);
+    if (shouldDeferSummaries) {
+      this.summaryRuntimeWarnings = [];
+      this.updateWarningMessage();
+      this.scheduleSummaryRebuild(records, groupingField, resolvedCardFields);
+      return this.applySummaryPlaceholders(columns);
+    }
     this.summaryRuntimeWarnings = columns.flatMap(
       (column) => column.summaryWarnings || []
     );
@@ -1270,6 +1292,95 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
     }
     this._rebuildColumnsRafId = null;
     this._rebuildColumnsRafType = null;
+  }
+
+  cancelScheduledSummaryRebuild() {
+    if (!this._summaryRebuildRafId) {
+      return;
+    }
+    if (
+      this._summaryRebuildRafType === "raf" &&
+      typeof cancelAnimationFrame === "function"
+    ) {
+      cancelAnimationFrame(this._summaryRebuildRafId);
+    } else {
+      clearTimeout(this._summaryRebuildRafId);
+    }
+    this._summaryRebuildRafId = null;
+    this._summaryRebuildRafType = null;
+  }
+
+  shouldDeferSummaries(records) {
+    return (
+      Array.isArray(this.summaryDefinitions) &&
+      this.summaryDefinitions.length > 0 &&
+      Array.isArray(records) &&
+      records.length > 0
+    );
+  }
+
+  applySummaryPlaceholders(columns) {
+    const definitions = Array.isArray(this.summaryDefinitions)
+      ? this.summaryDefinitions
+      : [];
+    if (!definitions.length) {
+      return columns;
+    }
+    return (columns || []).map((column) => {
+      if (!column || !column.count) {
+        return { ...column, summaries: [], summaryWarnings: [] };
+      }
+      const summaries = definitions.map((summary) => ({
+        key: [
+          summary?.fieldApiName || "",
+          summary?.summaryType || "",
+          summary?.label || ""
+        ].join("|"),
+        label: summary?.label || "",
+        value: "",
+        isLoading: true
+      }));
+      return {
+        ...column,
+        summaries,
+        summaryWarnings: []
+      };
+    });
+  }
+
+  scheduleSummaryRebuild(records, groupingField, cardFields) {
+    this.cancelScheduledSummaryRebuild();
+    const token = (this._summaryRebuildToken += 1);
+    const run = () => {
+      this._summaryRebuildRafId = null;
+      this._summaryRebuildRafType = null;
+      if (token !== this._summaryRebuildToken) {
+        return;
+      }
+      if (!this._isConnected) {
+        return;
+      }
+      if (!this.shouldDeferSummaries(records)) {
+        return;
+      }
+      const columns = this.buildColumns(records, groupingField, cardFields, {
+        deferSummaries: false
+      });
+      this.columns = columns;
+      this.logDebug("Summaries rebuilt after initial render.", {
+        columnCount: columns.length
+      });
+    };
+
+    if (typeof requestAnimationFrame === "function") {
+      this._summaryRebuildRafType = "raf";
+      // eslint-disable-next-line @lwc/lwc/no-async-operation
+      this._summaryRebuildRafId = requestAnimationFrame(run);
+      return;
+    }
+    this._summaryRebuildRafType = "timeout";
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
+    this._summaryRebuildRafId = setTimeout(run, 0);
   }
 
   @api

@@ -18,7 +18,17 @@
           <template for:each={columnSummaries} for:item="summary">
             <div key={summary.key} class="kanban-column_summary-row">
               <span class="kanban-column_summary-label">{summary.label}</span>
-              <span class="kanban-column_summary-value">{summary.value}</span>
+              <template if:true={summary.isLoading}>
+                <span
+                  class="kanban-column_summary-spinner"
+                  aria-label="Loading"
+                ></span>
+              </template>
+              <template if:false={summary.isLoading}>
+                <span class="kanban-column_summary-value">
+                  {summary.value}
+                </span>
+              </template>
             </div>
           </template>
         </div>

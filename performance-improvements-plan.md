@@ -23,7 +23,7 @@
 - Item 2: Completed
 - Item 3: Completed
 - Item 4: Completed
-- Item 5: Fully specified
+- Item 5: Completed
 - Item 6: Fully specified
 - Item 7: Fully specified
 - Item 8: Fully specified
@@ -203,7 +203,7 @@ Build a record-id keyed cache during `applyCardRecordsSnapshot()` and have extra
 - Cleared/rebuilt the cache on snapshot application, config changes, date/time format changes, and metadata reloads, with debug logging for build/clear events.
 - Added a unit test to verify cached values are reused and cleared values fall back to live extraction.
 
-## 5) Item: Defer summary calculations (placeholders first, compute after render)
+## 5) Item: Defer summary calculations (placeholders first, compute after render) (Completed)
 
 **What it is**
 Render the board immediately with placeholder summary values, then compute and populate summaries after the main UI has painted.
@@ -235,6 +235,13 @@ Split summary rendering into two phases: a fast initial render (no summaries or 
 - Cancel or ignore stale summary computations if a new rebuild happens before completion.
 - Delay summary warning messages until summaries are computed.
 - Add unit tests in `lresKanbanExplorer` to verify deferred summary placeholders and eventual summary population.
+
+### Implemented Solution
+
+- Deferred summary computation to the next animation frame and rendered per-summary spinners during the initial column build.
+- Rebuilt columns with full summaries after the defer window, updating summary warnings once computed.
+- Skipped placeholder summaries for empty columns and canceled pending summary rebuilds on disconnect.
+- Added unit tests to cover placeholder rendering and summary warning timing after the deferred pass.
 
 ## 6) Item: Reduce drag-and-drop UI lag (hover/dragover lifecycle)
 

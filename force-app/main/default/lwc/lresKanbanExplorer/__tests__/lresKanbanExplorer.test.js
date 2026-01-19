@@ -220,8 +220,19 @@ describe("c-lres-kanban-explorer", () => {
 
     const element = buildComponent();
     element.columnSummariesDefinition = "[Amount|SUM|Total]";
+    let rafCallback;
+    const originalRaf = global.requestAnimationFrame;
+    global.requestAnimationFrame = (callback) => {
+      rafCallback = callback;
+      return 1;
+    };
     emitMetadata();
     await settleComponent(4);
+
+    if (typeof rafCallback === "function") {
+      rafCallback();
+      await flushPromises();
+    }
 
     const container = element.shadowRoot.querySelector(
       "c-lres-kanban-board-container"
@@ -229,6 +240,7 @@ describe("c-lres-kanban-explorer", () => {
     expect(container.warningMessage).toContain("multiple currencies");
     const openColumn = container.columns.find((col) => col.key === "Open");
     expect(openColumn.summaries[0].value).toBe("Mixed currencies");
+    global.requestAnimationFrame = originalRaf;
   });
 
   it("builds columns from Apex data and filters by search input", async () => {
@@ -570,5 +582,56 @@ describe("c-lres-kanban-explorer", () => {
       "filter-dropdown_button filter-dropdown_button--active"
     );
     expect(component.unregisterMenuOutsideClick).toHaveBeenCalled();
+  });
+
+  it("defers summary calculations and fills placeholders after render", async () => {
+    const records = [
+      buildWireRecord({
+        id: "001",
+        fields: {
+          "Opportunity.Id": { value: "001" },
+          "Opportunity.Status__c": { value: "Open", displayValue: "Open" },
+          "Opportunity.Name": {
+            value: "First Deal",
+            displayValue: "First Deal"
+          },
+          "Opportunity.Amount": { value: 100, displayValue: "100" },
+          "Opportunity.CurrencyIsoCode": {
+            value: "USD",
+            displayValue: "USD"
+          }
+        }
+      })
+    ];
+    fetchRelatedCardRecords.mockResolvedValue(records);
+
+    const element = buildComponent();
+    element.columnSummariesDefinition = "[Amount|SUM|Total]";
+    let rafCallback;
+    const originalRaf = global.requestAnimationFrame;
+    global.requestAnimationFrame = (callback) => {
+      rafCallback = callback;
+      return 1;
+    };
+    emitMetadata();
+    await settleComponent(4);
+
+    const container = element.shadowRoot.querySelector(
+      "c-lres-kanban-board-container"
+    );
+    const openColumn = container.columns.find((col) => col.key === "Open");
+    const placeholder = openColumn.summaries[0];
+    expect(placeholder.isLoading).toBe(true);
+
+    if (typeof rafCallback === "function") {
+      rafCallback();
+      await flushPromises();
+    }
+
+    const updatedColumn = container.columns.find((col) => col.key === "Open");
+    const summary = updatedColumn.summaries[0];
+    expect(summary.isLoading).not.toBe(true);
+    expect(summary.value).toContain("100");
+    global.requestAnimationFrame = originalRaf;
   });
 });
