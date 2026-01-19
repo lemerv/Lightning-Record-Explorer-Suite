@@ -94,7 +94,37 @@ export function qualifyFieldName(component, fieldName) {
   return `${cardObjectApiName}.${trimmed}`;
 }
 
+function resolveRecordCacheId(record) {
+  if (!record) {
+    return null;
+  }
+  const directId = record.id || record.Id;
+  if (directId) {
+    return String(directId);
+  }
+  const fieldId = record?.fields?.Id?.value || record?.fields?.Id?.displayValue;
+  return fieldId ? String(fieldId) : null;
+}
+
+function resolveFieldCacheKey(component, field) {
+  if (!field) {
+    return null;
+  }
+  const normalized = normalizeFieldPath(component, field);
+  return normalized || null;
+}
+
 export function extractFieldData(component, record, field) {
+  const cache = component?._fieldDataCache;
+  const recordId = resolveRecordCacheId(record);
+  const cacheKey = resolveFieldCacheKey(component, field);
+  if (cache && recordId && cacheKey) {
+    const recordCache = cache.get(recordId);
+    if (recordCache?.has(cacheKey)) {
+      return recordCache.get(cacheKey);
+    }
+  }
+
   const data = lookupFieldData(component, record, field);
   if (!data) {
     return { raw: null, display: "" };
@@ -108,10 +138,19 @@ export function extractFieldData(component, record, field) {
     initialDisplay,
     record
   );
-  return {
+  const result = {
     raw,
     display: display === null || display === undefined ? "" : display
   };
+  if (cache && recordId && cacheKey) {
+    let recordCache = cache.get(recordId);
+    if (!recordCache) {
+      recordCache = new Map();
+      cache.set(recordId, recordCache);
+    }
+    recordCache.set(cacheKey, result);
+  }
+  return result;
 }
 
 export function extractFieldValue(component, record, field) {

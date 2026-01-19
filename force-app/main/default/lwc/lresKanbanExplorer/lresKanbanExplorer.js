@@ -176,6 +176,7 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
   _debugLoggingEnabled = true;
   _parentSelectionRefreshTimeout;
   patternTokenCache = new Map();
+  _fieldDataCache = null;
   _isConnected = false;
   _dataModeCache = null;
   _modalOpen = false;
@@ -566,6 +567,8 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
     });
     this.patternTokenCache.clear();
     this.filtersDirty = true;
+    this.clearFieldDataCache("dateTimeFormat change");
+    this.buildFieldDataCache(this.relatedRecords || []);
     this.buildFilterDefinitions(this.relatedRecords || []);
     this.rebuildColumnsWithPicklist();
   }
@@ -972,6 +975,7 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
     });
     this.filtersDirty = true;
     this.relatedRecords = dataset;
+    this.buildFieldDataCache(dataset);
     const groupingField = this.groupingFieldQualified;
     const cardFields = this.cardFieldsQualified;
     if (!this.validateSnapshotGrouping()) {
@@ -986,6 +990,61 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
 
   normalizeCardRecords(records) {
     return Array.isArray(records) ? records : [];
+  }
+
+  clearFieldDataCache(reason) {
+    if (!this._fieldDataCache) {
+      return;
+    }
+    this._fieldDataCache = null;
+    this.logDebug("Field data cache cleared.", {
+      reason: reason || "unspecified"
+    });
+  }
+
+  getFieldCacheFields() {
+    const fields = new Set();
+    const addField = (field) => {
+      if (field) {
+        fields.add(field);
+      }
+    };
+
+    this.cardFieldsQualified.forEach(addField);
+    this.filterFieldsQualified.forEach(addField);
+    this.searchFieldsQualified.forEach(addField);
+    this.availableSortFields.forEach(addField);
+    (this.summaryDefinitions || []).forEach((summary) =>
+      addField(summary?.fieldApiName)
+    );
+
+    const needsCurrency = (this.summaryDefinitions || []).some(
+      (summary) => summary?.dataType === "currency"
+    );
+    if (needsCurrency) {
+      addField(this.qualifyFieldName("CurrencyIsoCode"));
+    }
+
+    return Array.from(fields);
+  }
+
+  buildFieldDataCache(records) {
+    const dataset = Array.isArray(records) ? records : [];
+    const fieldsToCache = this.getFieldCacheFields();
+    if (!dataset.length || !fieldsToCache.length) {
+      this._fieldDataCache = null;
+      return;
+    }
+    this._fieldDataCache = new Map();
+    dataset.forEach((record) => {
+      fieldsToCache.forEach((field) => {
+        this.extractFieldData(record, field);
+      });
+    });
+    this.logDebug("Field data cache built.", {
+      recordCount: dataset.length,
+      fieldCount: fieldsToCache.length
+    });
   }
 
   validateSnapshotGrouping() {
@@ -1021,6 +1080,7 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
   }
 
   handleConfigChange() {
+    this.clearFieldDataCache("config change");
     this.refreshSummaryDefinitions();
     handleConfigChangeState(this);
   }
@@ -1316,6 +1376,8 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
         defaultRecordTypeId: data.defaultRecordTypeId
       });
       this.refreshSummaryDefinitions();
+      this.clearFieldDataCache("object info loaded");
+      this.buildFieldDataCache(this.relatedRecords || []);
       this.filtersDirty = true;
       this.rebuildColumnsWithPicklist();
     } else if (error) {

@@ -22,7 +22,7 @@
 - Item 1: Completed
 - Item 2: Completed
 - Item 3: Completed
-- Item 4: Fully specified
+- Item 4: Completed
 - Item 5: Fully specified
 - Item 6: Fully specified
 - Item 7: Fully specified
@@ -160,7 +160,7 @@ Wrap `rebuildColumnsWithPicklist()` calls in a scheduler that coalesces user-dri
 - Added component cleanup for pending user rebuild scheduling on disconnect.
 - Updated unit tests to assert user rebuild scheduling for sort and filter interactions.
 
-## 4) Item: Memoize per-record field extraction/display values
+## 4) Item: Memoize per-record field extraction/display values (Completed)
 
 **What it is**
 Precompute and cache derived field values for each record once per snapshot, reuse them for filtering, search, sorting, and card rendering.
@@ -195,6 +195,13 @@ Build a record-id keyed cache during `applyCardRecordsSnapshot()` and have extra
 **Risks and edge cases**
 
 - Memory overhead and cache invalidation complexity.
+
+### Implemented Solution
+
+- Added a per-record field data cache populated after `normalizeCardRecords` and reused via `extractFieldData` for filter/search/sort/summary and card rendering.
+- Built cache entries using the union of card, filter, search, sort, and summary fields (including currency code when needed).
+- Cleared/rebuilt the cache on snapshot application, config changes, date/time format changes, and metadata reloads, with debug logging for build/clear events.
+- Added a unit test to verify cached values are reused and cleared values fall back to live extraction.
 
 ## 5) Item: Defer summary calculations (placeholders first, compute after render)
 
