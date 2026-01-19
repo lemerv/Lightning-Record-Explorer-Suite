@@ -111,6 +111,14 @@ import {
   formatSummaryValue as formatSummaryValueUtil,
   resolveCurrencyCode as resolveCurrencyCodeUtil
 } from "./summaryValueUtils";
+import {
+  cancelScheduledRebuildColumns as cancelScheduledRebuildColumnsUtil,
+  cancelScheduledSummaryRebuild as cancelScheduledSummaryRebuildUtil,
+  cancelScheduledUserRebuild as cancelScheduledUserRebuildUtil,
+  scheduleRebuildColumns as scheduleRebuildColumnsUtil,
+  scheduleSummaryRebuild as scheduleSummaryRebuildUtil,
+  scheduleUserRebuild as scheduleUserRebuildUtil
+} from "./schedulerUtils";
 import KanbanRecordModal from "c/lresKanbanRecordModal";
 const DEFAULT_EMPTY_LABEL = "No Value";
 const MASTER_RECORD_TYPE_ID = "012000000000000AAA";
@@ -1296,73 +1304,25 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
   }
 
   scheduleRebuildColumnsWithPicklist() {
-    this.cancelScheduledRebuildColumns();
-    if (typeof requestAnimationFrame === "function") {
-      this._rebuildColumnsRafType = "raf";
-      // eslint-disable-next-line @lwc/lwc/no-async-operation
-      this._rebuildColumnsRafId = requestAnimationFrame(() => {
-        this._rebuildColumnsRafId = null;
-        this._rebuildColumnsRafType = null;
-        this.rebuildColumnsWithPicklist();
-      });
-      return;
-    }
-    this._rebuildColumnsRafType = "timeout";
-    // eslint-disable-next-line @lwc/lwc/no-async-operation
-    this._rebuildColumnsRafId = setTimeout(() => {
-      this._rebuildColumnsRafId = null;
-      this._rebuildColumnsRafType = null;
-      this.rebuildColumnsWithPicklist();
-    }, 0);
+    scheduleRebuildColumnsUtil(this, () => this.rebuildColumnsWithPicklist());
   }
 
   scheduleUserRebuildColumnsWithPicklist() {
-    this.cancelScheduledUserRebuild();
-    // eslint-disable-next-line @lwc/lwc/no-async-operation
-    this._userRebuildTimeoutId = setTimeout(() => {
-      this._userRebuildTimeoutId = null;
-      this.scheduleRebuildColumnsWithPicklist();
-    }, 200);
+    scheduleUserRebuildUtil(this, () =>
+      this.scheduleRebuildColumnsWithPicklist()
+    );
   }
 
   cancelScheduledUserRebuild() {
-    if (!this._userRebuildTimeoutId) {
-      return;
-    }
-    clearTimeout(this._userRebuildTimeoutId);
-    this._userRebuildTimeoutId = null;
+    cancelScheduledUserRebuildUtil(this);
   }
 
   cancelScheduledRebuildColumns() {
-    if (!this._rebuildColumnsRafId) {
-      return;
-    }
-    if (
-      this._rebuildColumnsRafType === "raf" &&
-      typeof cancelAnimationFrame === "function"
-    ) {
-      cancelAnimationFrame(this._rebuildColumnsRafId);
-    } else {
-      clearTimeout(this._rebuildColumnsRafId);
-    }
-    this._rebuildColumnsRafId = null;
-    this._rebuildColumnsRafType = null;
+    cancelScheduledRebuildColumnsUtil(this);
   }
 
   cancelScheduledSummaryRebuild() {
-    if (!this._summaryRebuildRafId) {
-      return;
-    }
-    if (
-      this._summaryRebuildRafType === "raf" &&
-      typeof cancelAnimationFrame === "function"
-    ) {
-      cancelAnimationFrame(this._summaryRebuildRafId);
-    } else {
-      clearTimeout(this._summaryRebuildRafId);
-    }
-    this._summaryRebuildRafId = null;
-    this._summaryRebuildRafType = null;
+    cancelScheduledSummaryRebuildUtil(this);
   }
 
   shouldDeferSummaries(records) {
@@ -1404,38 +1364,16 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
   }
 
   scheduleSummaryRebuild(records, groupingField, cardFields) {
-    this.cancelScheduledSummaryRebuild();
-    const token = (this._summaryRebuildToken += 1);
-    const run = () => {
-      this._summaryRebuildRafId = null;
-      this._summaryRebuildRafType = null;
-      if (token !== this._summaryRebuildToken) {
-        return;
-      }
-      if (!this._isConnected) {
-        return;
-      }
-      if (!this.shouldDeferSummaries(records)) {
-        return;
-      }
-      const columns = this.buildColumns(records, groupingField, cardFields, {
-        deferSummaries: false
-      });
-      this.columns = columns;
-      this.logDebug("Summaries rebuilt after initial render.", {
-        columnCount: columns.length
-      });
-    };
-
-    if (typeof requestAnimationFrame === "function") {
-      this._summaryRebuildRafType = "raf";
-      // eslint-disable-next-line @lwc/lwc/no-async-operation
-      this._summaryRebuildRafId = requestAnimationFrame(run);
-      return;
-    }
-    this._summaryRebuildRafType = "timeout";
-    // eslint-disable-next-line @lwc/lwc/no-async-operation
-    this._summaryRebuildRafId = setTimeout(run, 0);
+    scheduleSummaryRebuildUtil(this, {
+      records,
+      groupingField,
+      cardFields,
+      shouldDeferSummaries: (recordsToCheck) =>
+        this.shouldDeferSummaries(recordsToCheck),
+      buildColumns: (rows, grouping, fields, options) =>
+        this.buildColumns(rows, grouping, fields, options),
+      logDebug: (message, detail) => this.logDebug(message, detail)
+    });
   }
 
   @api

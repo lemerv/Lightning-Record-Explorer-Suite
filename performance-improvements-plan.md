@@ -28,6 +28,9 @@
 - Item 7: Completed
 - Item 8: Completed
 - Item 9: Fully specified
+- Item 10: Completed
+- Item 11: Fully specified
+- Item 12: Fully specified
 
 ## 1) Item: Skip full filter-definition rebuilds when records are unchanged (Completed)
 
@@ -424,3 +427,122 @@ After all items are implemented, audit added logic, identify tightly-coupled vs 
 **Risks and edge cases**
 
 - Over-refactoring could obscure the flow of component state changes.
+
+### Findings
+
+- `lresKanbanExplorer.js` now mixes core state/config with scheduling logic (user rebuild debounce, RAF scheduling, summary rebuild timing).
+- `boardInteractions.js` includes both event handling and pure column-mutation logic for optimistic drag/drop.
+- `lresKanbanColumn.js` contains DOM wiring plus virtualization math (range and spacer calculations).
+
+### Proposed Follow-on Items
+
+#### 10) Item: Extract scheduling helpers for rebuilds and summaries (Completed)
+
+**What it is**
+Move rebuild/scheduling orchestration (user debounce, RAF scheduling, summary rebuild timing) into a small helper module.
+
+**Why**
+`lresKanbanExplorer.js` has grown to include timing/queueing logic that is conceptually separate from config/state management.
+
+**Concrete benefits**
+
+- Reduces `lresKanbanExplorer.js` size and cognitive load.
+- Makes timing logic easier to unit test and safer to tune.
+- Localizes debounce/RAF behavior changes to one helper.
+
+**Best practice alignment**
+Yes—separating scheduling from component state aligns with separation of concerns and keeps components thin.
+
+**Recommendation**
+Yes, low urgency. Do this if scheduler behavior will continue to evolve.
+
+**Key components involved**
+
+- `force-app/main/default/lwc/lresKanbanExplorer/lresKanbanExplorer.js`
+- New helper (e.g., `force-app/main/default/lwc/lresKanbanExplorer/schedulerUtils.js`)
+
+**High-level approach**
+
+- Extract user rebuild debounce and RAF scheduling into a helper.
+- Extract summary rebuild scheduling into the same helper or a focused summary scheduler.
+- Keep component state mutations in the component; helper returns scheduling handles or invokes callbacks.
+- Add unit tests for timing behavior if extracted.
+
+**Risks and edge cases**
+
+- Over-abstraction could hide scheduling side effects if the helper isn’t kept small and focused.
+
+##### Implemented Solution
+
+- Extracted rebuild and summary scheduling into `schedulerUtils.js` with explicit helpers for user rebuild, RAF rebuild, and summary scheduling.
+- Updated the component to delegate scheduling to the helper while preserving existing timing behavior.
+
+#### 11) Item: Extract optimistic drag/drop column mutation helper
+
+**What it is**
+Move the pure optimistic column move/revert logic out of `boardInteractions.js` into a helper function.
+
+**Why**
+`boardInteractions.js` now blends event orchestration with pure column mutation, making it harder to reason about.
+
+**Concrete benefits**
+
+- Clearer drop handling; mutation logic becomes a pure input → output transformation.
+- Easier unit tests for optimistic move/revert behavior.
+- Safer future tweaks to drag/drop behavior.
+
+**Best practice alignment**
+Yes—extracting pure functions improves readability and testability.
+
+**Recommendation**
+Yes, medium urgency if drag/drop behavior is expected to evolve; otherwise optional.
+
+**Key components involved**
+
+- `force-app/main/default/lwc/lresKanbanExplorer/boardInteractions.js`
+- New helper (e.g., `force-app/main/default/lwc/lresKanbanExplorer/dragDropUtils.js`)
+
+**High-level approach**
+
+- Move `buildOptimisticColumnsForDrop` into a helper module.
+- Keep side effects (setting `component.columns`, logging, toasts) in `boardInteractions.js`.
+- Add helper unit tests for the column transformation logic.
+
+**Risks and edge cases**
+
+- Must ensure any future column shape changes remain aligned with the helper output.
+
+#### 12) Item: Extract virtualization math into a helper (optional)
+
+**What it is**
+Move window range and spacer calculations into a pure helper used by `lresKanbanColumn.js`.
+
+**Why**
+The column component mixes DOM measurement/scroll wiring with non-trivial math; the math can be isolated.
+
+**Concrete benefits**
+
+- Keeps `lresKanbanColumn.js` focused on DOM/lifecycle work.
+- Simplifies unit tests for range calculations and buffer behavior.
+- Easier to extend for future features (resize handling, dynamic row heights).
+
+**Best practice alignment**
+Yes—separating computation from DOM interaction improves maintainability.
+
+**Recommendation**
+Optional. Do this only if virtualization is likely to grow in complexity.
+
+**Key components involved**
+
+- `force-app/main/default/lwc/lresKanbanColumn/lresKanbanColumn.js`
+- New helper (e.g., `force-app/main/default/lwc/lresKanbanColumn/virtualizationUtils.js`)
+
+**High-level approach**
+
+- Extract range calculation (start/end indices) and spacer sizing into a helper.
+- Keep DOM measurement and scroll event handling in the component.
+- Add unit tests for the helper with various scroll/height/buffer scenarios.
+
+**Risks and edge cases**
+
+- Helper must remain lightweight to avoid making simple logic feel indirect.
