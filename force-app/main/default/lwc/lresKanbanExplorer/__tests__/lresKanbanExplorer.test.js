@@ -416,6 +416,43 @@ describe("c-lres-kanban-explorer", () => {
     expect(fetchRelatedCardRecords.mock.calls.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("reverts the optimistic move when the update fails", async () => {
+    fetchRelatedCardRecords.mockResolvedValue(baseApexRecords);
+    const element = buildComponent();
+    emitMetadata();
+    await settleComponent(2);
+
+    const container = element.shadowRoot.querySelector(
+      "c-lres-kanban-board-container"
+    );
+    const initialOpen = container.columns.find((col) => col.key === "Open");
+    const initialClosed = container.columns.find((col) => col.key === "Closed");
+    expect(initialOpen.records).toHaveLength(1);
+    expect(initialClosed.records).toHaveLength(1);
+
+    updateRecord.mockRejectedValue(new Error("update failed"));
+
+    container.dispatchEvent(
+      new CustomEvent("columndrop", {
+        detail: {
+          recordId: "001",
+          sourceColumnKey: "Open",
+          targetColumnKey: "Closed"
+        },
+        bubbles: true,
+        composed: true
+      })
+    );
+    await flushPromises();
+
+    const openColumn = container.columns.find((col) => col.key === "Open");
+    const closedColumn = container.columns.find((col) => col.key === "Closed");
+    expect(openColumn.records).toHaveLength(1);
+    expect(closedColumn.records).toHaveLength(1);
+    expect(openColumn.records.some((card) => card.id === "001")).toBe(true);
+    expect(closedColumn.records.some((card) => card.id === "001")).toBe(false);
+  });
+
   it("uses Apex refresh when card where clause is active", async () => {
     fetchRelatedCardRecords
       .mockResolvedValueOnce(baseApexRecords)

@@ -730,6 +730,76 @@ function scheduleSearchRebuild(component) {
   component.rebuildColumnsWithPicklist();
 }
 
+function buildOptimisticColumnsForDrop(
+  component,
+  { recordId, sourceColumnKey, targetColumnKey }
+) {
+  const columns = Array.isArray(component.columns) ? component.columns : [];
+  if (!columns.length) {
+    return null;
+  }
+
+  const targetColumn = component.findColumnByKey(targetColumnKey);
+  if (!targetColumn) {
+    return null;
+  }
+
+  let sourceColumn = sourceColumnKey
+    ? component.findColumnByKey(sourceColumnKey)
+    : null;
+  let sourceCard = null;
+  if (sourceColumn && Array.isArray(sourceColumn.records)) {
+    sourceCard = sourceColumn.records.find((card) => card.id === recordId);
+  }
+
+  if (!sourceCard) {
+    sourceColumn =
+      columns.find(
+        (column) =>
+          Array.isArray(column.records) &&
+          column.records.some((card) => card.id === recordId)
+      ) || null;
+    sourceCard = sourceColumn?.records?.find((card) => card.id === recordId);
+  }
+
+  if (!sourceColumn || !sourceCard) {
+    return null;
+  }
+
+  if (sourceColumn.key === targetColumn.key) {
+    return null;
+  }
+
+  const savingCard = { ...sourceCard, isSaving: true };
+  const nextColumns = columns.map((column) => {
+    if (column.key === sourceColumn.key) {
+      const records = Array.isArray(column.records) ? column.records : [];
+      const nextRecords = records.filter((card) => card.id !== recordId);
+      return {
+        ...column,
+        records: nextRecords
+      };
+    }
+    if (column.key === targetColumn.key) {
+      const records = Array.isArray(column.records) ? column.records : [];
+      const nextRecords = [
+        ...records.filter((card) => card.id !== recordId),
+        savingCard
+      ];
+      return {
+        ...column,
+        records: nextRecords
+      };
+    }
+    return column;
+  });
+
+  return {
+    previousColumns: columns,
+    nextColumns
+  };
+}
+
 export async function updateRecordGrouping(
   component,
   { recordId, sourceColumnKey, targetColumnKey, blankKey }
@@ -756,6 +826,15 @@ export async function updateRecordGrouping(
   fields[groupingField] =
     newValue === null || newValue === undefined ? null : String(newValue);
 
+  const optimisticColumns = buildOptimisticColumnsForDrop(component, {
+    recordId,
+    sourceColumnKey,
+    targetColumnKey
+  });
+  if (optimisticColumns) {
+    component.columns = optimisticColumns.nextColumns;
+  }
+
   component.isLoading = true;
   if (component._debugLoggingEnabled) {
     console.log("[KanbanExplorer][Debug] updateRecordGrouping", {
@@ -773,8 +852,10 @@ export async function updateRecordGrouping(
     newValue
   });
 
+  let updateSucceeded = false;
   try {
     await updateRecord({ fields });
+    updateSucceeded = true;
     await component.performCardRecordsRefresh();
     component.logInfo("Record grouping updated.", {
       recordId,
@@ -782,6 +863,9 @@ export async function updateRecordGrouping(
       newValue
     });
   } catch (error) {
+    if (!updateSucceeded && optimisticColumns?.previousColumns) {
+      component.columns = optimisticColumns.previousColumns;
+    }
     component.isLoading = false;
     component.showErrorToast(error, { title: "Unable to update record" });
     component.logError("Record update failed.", error);

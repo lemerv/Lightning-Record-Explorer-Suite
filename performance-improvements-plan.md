@@ -25,7 +25,7 @@
 - Item 4: Completed
 - Item 5: Completed
 - Item 6: Completed
-- Item 7: Fully specified
+- Item 7: Completed
 - Item 8: Fully specified
 - Item 9: Fully specified
 
@@ -297,7 +297,7 @@ Minimize drag event work during interactions and avoid unnecessary re-renders wh
 - Moved drag-start styling to a local card class toggle and removed dragged-record propagation.
 - Added dragover throttling and card drag styling unit tests.
 
-## 7) Item: Optimistic drag-and-drop updates with partial refresh
+## 7) Item: Optimistic drag-and-drop updates with partial refresh (Completed)
 
 **What it is**
 Update the UI immediately on drop, update the record in the background, and refresh only affected columns (or roll back on error).
@@ -335,6 +335,14 @@ Adjust local state on drop, fire the update, then reconcile on success/failure w
 **Risks and edge cases**
 
 - Need robust rollback on failure and careful sync with server state.
+
+### Implemented Solution
+
+- Added an optimistic column move on drop that appends the card to the target column and marks it as `isSaving` while the update is in flight.
+- Reverted the optimistic move on update failure before showing the error toast.
+- Prevented dragging cards while saving and added a lightweight saving style.
+- Kept counts and summaries unchanged during the optimistic phase, with a full refresh after a successful update.
+- Added tests for optimistic move, saving state, and rollback behavior.
 
 ## 8) Item: Virtualize cards per column (windowing)
 

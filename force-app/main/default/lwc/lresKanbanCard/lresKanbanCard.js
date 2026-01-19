@@ -31,11 +31,15 @@ export default class KanbanCard extends LightningElement {
   }
 
   get cardClass() {
-    return "kanban-card";
+    return this.isSaving ? "kanban-card is-saving" : "kanban-card";
   }
 
   get isDraggable() {
-    return !this.dragDisabled;
+    return !this.dragDisabled && !this.isSaving;
+  }
+
+  get isSaving() {
+    return Boolean(this.card?.isSaving);
   }
 
   handleDragStart(event) {

@@ -26,6 +26,11 @@
   cursor: grabbing;
 }
 
+.kanban-card.is-saving {
+  opacity: 0.7;
+  cursor: progress;
+}
+
 .kanban-card_title {
   display: flex;
   align-items: center;

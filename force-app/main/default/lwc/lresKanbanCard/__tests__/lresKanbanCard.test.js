@@ -60,6 +60,22 @@ describe("c-lres-kanban-card", () => {
     expect(dragEvent.preventDefault).toHaveBeenCalled();
   });
 
+  it("shows saving state and blocks drag while saving", () => {
+    const element = buildComponent({
+      card: { id: "001", title: "Test", details: [], isSaving: true }
+    });
+    const article = element.shadowRoot.querySelector("article");
+    expect(article.classList.contains("is-saving")).toBe(true);
+
+    const dragEvent = new CustomEvent("dragstart", {
+      bubbles: true,
+      cancelable: true
+    });
+    dragEvent.preventDefault = jest.fn();
+    article.dispatchEvent(dragEvent);
+    expect(dragEvent.preventDefault).toHaveBeenCalled();
+  });
+
   it("dispatches drag end and title click events", () => {
     const element = buildComponent({
       card: { id: "001", title: "Test", details: [] },
