@@ -84,8 +84,23 @@ export default class KanbanColumn extends LightningElement {
     return Array.isArray(this._column?.summaries) ? this._column.summaries : [];
   }
 
+  get displaySummaries() {
+    const summaries = this.columnSummaries;
+    if (summaries.length === 0) {
+      return summaries;
+    }
+    if (this.columnCount > 0) {
+      return summaries;
+    }
+    return summaries.map((summary) => ({
+      ...summary,
+      value: "-",
+      isLoading: false
+    }));
+  }
+
   get hasSummaries() {
-    return this.columnSummaries.length > 0;
+    return this.displaySummaries.length > 0;
   }
 
   get totalRecordCount() {

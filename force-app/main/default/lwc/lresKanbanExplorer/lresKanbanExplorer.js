@@ -1342,9 +1342,10 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
       return columns;
     }
     return (columns || []).map((column) => {
-      if (!column || !column.count) {
-        return { ...column, summaries: [], summaryWarnings: [] };
+      if (!column || typeof column !== "object") {
+        return column;
       }
+      const hasRecords = Boolean(column.count);
       const summaries = definitions.map((summary) => ({
         key: [
           summary?.fieldApiName || "",
@@ -1352,8 +1353,8 @@ export default class KanbanExplorer extends NavigationMixin(LightningElement) {
           summary?.label || ""
         ].join("|"),
         label: summary?.label || "",
-        value: "",
-        isLoading: true
+        value: hasRecords ? "" : "-",
+        isLoading: hasRecords
       }));
       return {
         ...column,

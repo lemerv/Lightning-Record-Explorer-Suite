@@ -15,7 +15,7 @@
       </div>
       <template if:true={hasSummaries}>
         <div class="kanban-column_summaries">
-          <template for:each={columnSummaries} for:item="summary">
+          <template for:each={displaySummaries} for:item="summary">
             <div key={summary.key} class="kanban-column_summary-row">
               <span class="kanban-column_summary-label">{summary.label}</span>
               <template if:true={summary.isLoading}>
