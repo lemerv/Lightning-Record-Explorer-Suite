@@ -5,7 +5,6 @@
     </h2>
   </lightning-modal-header>
   <lightning-modal-body>
-
     <lightning-record-form
       record-id={recordId}
       object-api-name={objectApiName}
@@ -19,9 +18,7 @@
     ></lightning-record-form>
 
     <template if:true={errorMessage}>
-      <div class="slds-text-color_error slds-m-top_small">
-        {errorMessage}
-      </div>
+      <div class="slds-text-color_error slds-m-top_small">{errorMessage}</div>
     </template>
   </lightning-modal-body>
   <lightning-modal-footer>
@@ -33,6 +30,9 @@
       class="slds-m-right_x-small"
       disabled={isEditDisabled}
     ></lightning-button>
-    <lightning-button label="Close" onclick={handleCloseClick}></lightning-button>
+    <lightning-button
+      label="Close"
+      onclick={handleCloseClick}
+    ></lightning-button>
   </lightning-modal-footer>
 </template>

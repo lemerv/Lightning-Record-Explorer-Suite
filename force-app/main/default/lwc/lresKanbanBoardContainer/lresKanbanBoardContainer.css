@@ -1,21 +1,21 @@
 .board-container {
-    position: relative;
-    min-height: 12rem;
+  position: relative;
+  min-height: 12rem;
 }
 
 .spinner-wrapper {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.6);
-    z-index: 1;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6);
+  z-index: 1;
 }
 
 .kanban {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem;
-    min-height: 12rem;
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  min-height: 12rem;
 }

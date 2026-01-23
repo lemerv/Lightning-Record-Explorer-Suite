@@ -32,12 +32,17 @@ export function parseError(error) {
     if (output.fieldErrors) {
       Object.values(output.fieldErrors).forEach((fieldErrors) => {
         (fieldErrors || []).forEach((fieldError) =>
-          append(primaryMessages, fieldError?.message || fieldError?.errorMessage)
+          append(
+            primaryMessages,
+            fieldError?.message || fieldError?.errorMessage
+          )
         );
       });
     }
     if (Array.isArray(output.errors)) {
-      output.errors.forEach((item) => append(primaryMessages, item?.message || item));
+      output.errors.forEach((item) =>
+        append(primaryMessages, item?.message || item)
+      );
     }
     if (Array.isArray(output.pageErrors)) {
       output.pageErrors.forEach((pageError) =>
@@ -60,7 +65,9 @@ export function parseError(error) {
   } else if (body) {
     collectOutputErrors(body.output);
     if (Array.isArray(body.pageErrors)) {
-      body.pageErrors.forEach((pageError) => append(primaryMessages, pageError?.message));
+      body.pageErrors.forEach((pageError) =>
+        append(primaryMessages, pageError?.message)
+      );
     }
     append(fallbackMessages, body.message);
   }

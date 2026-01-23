@@ -1,32 +1,22 @@
 [
-    {
-        "sobject": "Account",
-        "files": [
-            "Account.json"
-        ]
-    },
-    {
-        "sobject": "Contact",
-        "files": [
-            "Contact.json"
-        ]
-    },
-    {
-        "sobject": "Case",
-        "files": [
-            "Case.json"
-        ]
-    },
-    {
-        "sobject": "Project__c",
-        "files": [
-            "Project__c.json"
-        ]
-    },
-    {
-        "sobject": "Project_Task__c",
-        "files": [
-            "Project_Task__c.json"
-        ]
-    }
+  {
+    "sobject": "Account",
+    "files": ["Account.json"]
+  },
+  {
+    "sobject": "Contact",
+    "files": ["Contact.json"]
+  },
+  {
+    "sobject": "Case",
+    "files": ["Case.json"]
+  },
+  {
+    "sobject": "Project__c",
+    "files": ["Project__c.json"]
+  },
+  {
+    "sobject": "Project_Task__c",
+    "files": ["Project_Task__c.json"]
+  }
 ]

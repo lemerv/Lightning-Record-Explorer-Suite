@@ -74,4 +74,50 @@ describe("c-lres-kanban-board-container", () => {
     expect(warning).toBeTruthy();
     expect(warning.textContent).toContain("Summary config warning");
   });
+
+  it("throttles dragover updates and applies trailing column change", async () => {
+    jest.useFakeTimers();
+    let now = 0;
+    const nowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
+    const element = buildComponent();
+    element.columns = [
+      { key: "col1", label: "Column 1", count: 0, records: [] },
+      { key: "col2", label: "Column 2", count: 0, records: [] }
+    ];
+    const flush = flushPromises();
+    jest.runOnlyPendingTimers();
+    await flush;
+
+    const columns = element.shadowRoot.querySelectorAll("c-lres-kanban-column");
+    columns[0].dispatchEvent(
+      new CustomEvent("columndragover", {
+        detail: { columnKey: "col1" },
+        bubbles: true,
+        composed: true
+      })
+    );
+    const flushAfterFirst = flushPromises();
+    jest.runOnlyPendingTimers();
+    await flushAfterFirst;
+    expect(columns[0].activeDropKey).toBe("col1");
+
+    now = 10;
+    columns[1].dispatchEvent(
+      new CustomEvent("columndragover", {
+        detail: { columnKey: "col2" },
+        bubbles: true,
+        composed: true
+      })
+    );
+    await Promise.resolve();
+    expect(columns[0].activeDropKey).toBe("col1");
+
+    now = 60;
+    jest.advanceTimersByTime(50);
+    await Promise.resolve();
+    expect(columns[0].activeDropKey).toBe("col2");
+
+    nowSpy.mockRestore();
+    jest.useRealTimers();
+  });
 });

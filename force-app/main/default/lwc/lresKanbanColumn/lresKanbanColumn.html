@@ -15,26 +15,41 @@
       </div>
       <template if:true={hasSummaries}>
         <div class="kanban-column_summaries">
-          <template for:each={columnSummaries} for:item="summary">
+          <template for:each={displaySummaries} for:item="summary">
             <div key={summary.key} class="kanban-column_summary-row">
               <span class="kanban-column_summary-label">{summary.label}</span>
-              <span class="kanban-column_summary-value">{summary.value}</span>
+              <template if:true={summary.isLoading}>
+                <span
+                  class="kanban-column_summary-spinner"
+                  aria-label="Loading"
+                ></span>
+              </template>
+              <template if:false={summary.isLoading}>
+                <span class="kanban-column_summary-value">
+                  {summary.value}
+                </span>
+              </template>
             </div>
           </template>
         </div>
       </template>
     </header>
-    <div class={bodyClass} style={columnBodyStyle}>
-      <template for:each={columnRecords} for:item="card">
+    <div class={bodyClass} style={columnBodyStyle} onscroll={handleBodyScroll}>
+      <template if:true={isWindowed}>
+        <div class="kanban-column_spacer" style={topSpacerStyle}></div>
+      </template>
+      <template for:each={visibleRecords} for:item="card">
         <c-lres-kanban-card
           key={card.id}
           card={card}
           column-key={columnKey}
           show-card-field-labels={showCardFieldLabels}
-          dragged-record-id={draggedRecordId}
           drag-disabled={dragDisabled}
           oncardopenexternallink={handleCardExternalLink}
         ></c-lres-kanban-card>
+      </template>
+      <template if:true={isWindowed}>
+        <div class="kanban-column_spacer" style={bottomSpacerStyle}></div>
       </template>
     </div>
   </section>

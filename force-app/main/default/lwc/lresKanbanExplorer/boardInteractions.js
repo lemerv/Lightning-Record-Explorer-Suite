@@ -1,9 +1,17 @@
 import { NavigationMixin } from "lightning/navigation";
 import { updateRecord } from "lightning/uiRecordApi";
 import { buildFilterDefinitions as buildFilterDefinitionsUtil } from "./filterUtils";
+import { buildOptimisticColumnsForDrop } from "./dragDropUtils";
 import { sanitizeFieldOutput } from "c/lresOutputUtils";
 
 export function buildFilterDefinitions(component, records) {
+  if (component.filtersDirty === false) {
+    syncFilterDefinitions(component);
+    component.logDebug("Filter definitions skipped; filters are clean.", {
+      filterCount: component.filterDefinitions?.length || 0
+    });
+    return;
+  }
   const { definitions, activeFilterMenuId, shouldCloseMenus } =
     buildFilterDefinitionsUtil({
       records: records || [],
@@ -26,9 +34,43 @@ export function buildFilterDefinitions(component, records) {
   if (shouldCloseMenus) {
     component.unregisterMenuOutsideClick();
   }
-  component.logDebug("Filter definitions updated.", {
+  component.filtersDirty = false;
+  component.logDebug("Filter definitions rebuilt.", {
     filterCount: component.filterDefinitions.length
   });
+}
+
+function syncFilterDefinitions(component) {
+  const activeFilterMenuId = component.activeFilterMenuId;
+  let activeMenuExists = false;
+  const definitions = (component.filterDefinitions || []).map((def) => {
+    const options = Array.isArray(def.options) ? def.options : [];
+    const optionValues = new Set(options.map((option) => option.value));
+    const selectedValues = (def.selectedValues || []).filter((value) =>
+      optionValues.has(value)
+    );
+    const hasSelection = selectedValues.length > 0;
+    const isOpen = def.id === activeFilterMenuId;
+    if (isOpen) {
+      activeMenuExists = true;
+    }
+    return {
+      ...def,
+      selectedValues,
+      options: options.map((option) => ({
+        ...option,
+        selected: selectedValues.includes(option.value)
+      })),
+      isOpen,
+      buttonClass: getFilterButtonClass(component, def.id, hasSelection)
+    };
+  });
+
+  component.filterDefinitions = definitions;
+  component.activeFilterMenuId = activeMenuExists ? activeFilterMenuId : null;
+  if (!component.activeFilterMenuId && !component.isSortMenuOpen) {
+    component.unregisterMenuOutsideClick();
+  }
 }
 
 export function getFilterBlueprints(component) {
@@ -192,7 +234,7 @@ export function handleSortDirectionToggle(component) {
     next: nextDirection
   });
   component.sortDirection = nextDirection;
-  component.rebuildColumnsWithPicklist();
+  scheduleUserRebuild(component);
 }
 
 export function handleClearFilters(component) {
@@ -212,7 +254,7 @@ export function handleClearFilters(component) {
   }));
   component.searchValue = "";
   component.closeFilterMenus();
-  component.rebuildColumnsWithPicklist();
+  scheduleUserRebuild(component);
 }
 
 export function toggleFilterMenu(component, event) {
@@ -262,7 +304,7 @@ export function handleFilterOptionToggle(component, event) {
     isChecked: checked
   });
   updateFilterSelection(component, filterId, value, checked);
-  component.rebuildColumnsWithPicklist();
+  scheduleUserRebuild(component);
 }
 
 export function updateFilterSelection(component, filterId, value, isSelected) {
@@ -403,7 +445,7 @@ export function handleSortOptionChange(component, event) {
       next: value
     });
     component.selectedSortField = value;
-    component.rebuildColumnsWithPicklist();
+    scheduleUserRebuild(component);
   }
   component.closeSortMenu();
 }
@@ -504,44 +546,30 @@ export async function handleManualRefresh(component, event) {
 
 export function handleSearchInput(component, event) {
   const value = event?.detail?.value ?? event.target?.value ?? "";
-  const debounced = getDebouncedSearchHandler(component);
-  debounced(value);
-}
-
-export function handleSearchKeyup(component, event) {
-  const value = event?.detail?.value ?? event.target?.value ?? "";
-  const debounced = getDebouncedSearchHandler(component);
+  const debounced = getSearchDebounceHandler(component);
   debounced(value);
 }
 
 export function applySearchValue(component, rawValue) {
-  const normalized = rawValue ? rawValue.toString().trim() : "";
-  if (normalized === component.searchValue) {
-    return;
-  }
-  component.logDebug("Search value updated.", {
-    previous: component.searchValue,
-    next: normalized
-  });
-  component.searchValue = normalized;
-  component.rebuildColumnsWithPicklist();
+  const normalized = normalizeSearchValue(rawValue);
+  applyNormalizedSearchValue(component, normalized);
 }
 
-export function getDebouncedSearchHandler(component, delayMs = 200) {
-  if (!component._debouncedSearchHandler) {
-    component._debouncedSearchHandler = debounce(
-      (value) => applySearchValue(component, value),
+export function getSearchDebounceHandler(component, delayMs = 200) {
+  if (!component._searchDebounceHandler) {
+    component._searchDebounceHandler = createSearchDebounceHandler(
+      component,
       delayMs
     );
   }
-  return component._debouncedSearchHandler;
+  return component._searchDebounceHandler;
 }
 
 export function clearDebouncedSearch(component) {
-  if (component._debouncedSearchHandler?.cancel) {
-    component._debouncedSearchHandler.cancel();
+  if (component._searchDebounceHandler?.cancel) {
+    component._searchDebounceHandler.cancel();
   }
-  component._debouncedSearchHandler = null;
+  component._searchDebounceHandler = null;
 }
 
 export function isAnyMenuOpen(component) {
@@ -649,24 +677,17 @@ export function focusElementNextTick(component, selector) {
   });
 }
 
-export function debounce(fn, delayMs = 200) {
+export function createSearchDebounceHandler(component, delayMs = 200) {
   let timeoutId = null;
-  let pendingArgs = null;
-  const wrapper = (...args) => {
-    const shouldInvokeImmediately = timeoutId === null;
-    pendingArgs = args;
-    if (shouldInvokeImmediately) {
-      fn(...pendingArgs);
-    }
+  const wrapper = (rawValue) => {
+    const normalized = normalizeSearchValue(rawValue);
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
     timeoutId = setTimeout(() => {
       timeoutId = null;
-      if (!shouldInvokeImmediately && pendingArgs) {
-        fn(...pendingArgs);
-      }
-      pendingArgs = null;
+      applyNormalizedSearchValue(component, normalized);
     }, delayMs);
   };
   wrapper.cancel = () => {
@@ -674,9 +695,40 @@ export function debounce(fn, delayMs = 200) {
       clearTimeout(timeoutId);
       timeoutId = null;
     }
-    pendingArgs = null;
   };
   return wrapper;
+}
+
+function normalizeSearchValue(rawValue) {
+  return rawValue ? rawValue.toString().trim() : "";
+}
+
+function applyNormalizedSearchValue(component, normalized) {
+  if (normalized === component.searchValue) {
+    return;
+  }
+  component.logDebug("Search value updated.", {
+    previous: component.searchValue,
+    next: normalized
+  });
+  component.searchValue = normalized;
+  scheduleSearchRebuild(component);
+}
+
+function scheduleUserRebuild(component) {
+  if (typeof component.scheduleUserRebuildColumnsWithPicklist === "function") {
+    component.scheduleUserRebuildColumnsWithPicklist();
+    return;
+  }
+  scheduleSearchRebuild(component);
+}
+
+function scheduleSearchRebuild(component) {
+  if (typeof component.scheduleRebuildColumnsWithPicklist === "function") {
+    component.scheduleRebuildColumnsWithPicklist();
+    return;
+  }
+  component.rebuildColumnsWithPicklist();
 }
 
 export async function updateRecordGrouping(
@@ -705,9 +757,18 @@ export async function updateRecordGrouping(
   fields[groupingField] =
     newValue === null || newValue === undefined ? null : String(newValue);
 
+  const optimisticColumns = buildOptimisticColumnsForDrop(component.columns, {
+    recordId,
+    sourceColumnKey,
+    targetColumnKey,
+    findColumnByKey: (key) => component.findColumnByKey(key)
+  });
+  if (optimisticColumns) {
+    component.columns = optimisticColumns.nextColumns;
+  }
+
   component.isLoading = true;
   if (component._debugLoggingEnabled) {
-    // eslint-disable-next-line no-console
     console.log("[KanbanExplorer][Debug] updateRecordGrouping", {
       recordId,
       sourceColumnKey,
@@ -723,8 +784,10 @@ export async function updateRecordGrouping(
     newValue
   });
 
+  let updateSucceeded = false;
   try {
     await updateRecord({ fields });
+    updateSucceeded = true;
     await component.performCardRecordsRefresh();
     component.logInfo("Record grouping updated.", {
       recordId,
@@ -732,6 +795,9 @@ export async function updateRecordGrouping(
       newValue
     });
   } catch (error) {
+    if (!updateSucceeded && optimisticColumns?.previousColumns) {
+      component.columns = optimisticColumns.previousColumns;
+    }
     component.isLoading = false;
     component.showErrorToast(error, { title: "Unable to update record" });
     component.logError("Record update failed.", error);

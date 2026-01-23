@@ -72,6 +72,22 @@
   font-weight: 400;
 }
 
+.kanban-column_summary-spinner {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  border: 2px solid rgba(92, 92, 92, 0.2);
+  border-top-color: rgba(92, 92, 92, 0.6);
+  display: inline-block;
+  animation: kanbanSummarySpin 0.7s linear infinite;
+}
+
+@keyframes kanbanSummarySpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .kanban-column_body {
   padding: 0.75rem;
   overflow-y: auto;
@@ -79,4 +95,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+.kanban-column_spacer {
+  flex: 0 0 auto;
 }

@@ -1,5 +1,7 @@
 <template>
+  <div class="kanban-version">Latest Build Loaded 1</div>
   <lightning-card title={resolvedBoardTitle} icon-name="standard:kanban">
+    <div class="kanban-version"></div>
     <template if:true={actionsAvailable}>
       <c-lres-kanban-board-actions
         slot="actions"
@@ -17,7 +19,6 @@
         refresh-button-disabled={refreshButtonDisabled}
         onclearfilters={handleClearFilters}
         onsearchinput={handleSearchInput}
-        onsearchkeyup={handleSearchKeyup}
         onsortmenutoggle={toggleSortMenu}
         onsortmenuclick={handleSortMenuClick}
         onsortmenukeydown={handleSortMenuKeydown}
@@ -54,6 +55,8 @@
       error-message={errorMessage}
       warning-message={warningMessage}
       show-empty-state={showEmptyState}
+      enable-virtualization={enableVirtualization}
+      card-display-config-key={cardDisplayConfigKey}
       oncolumndrop={handleColumnDrop}
       oncardtitleclick={handleTitleClick}
       oncardopenexternallink={handleExternalOpen}
