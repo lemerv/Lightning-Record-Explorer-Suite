@@ -1,8 +1,8 @@
 {
-  "name": "salesforce-app",
+  "name": "Lightning-Record-Explorer-Suite",
   "private": true,
   "version": "1.0.0",
-  "description": "Salesforce App",
+  "description": "A suite lightning web components for Salesforce.",
   "scripts": {
     "lint": "eslint **/{aura,lwc}/**/*.js",
     "test": "npm run test:unit",
