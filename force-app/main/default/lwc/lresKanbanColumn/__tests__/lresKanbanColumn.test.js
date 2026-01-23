@@ -1,6 +1,9 @@
 import { createElement } from "lwc";
 import KanbanColumn from "c/lresKanbanColumn";
-import { createDataTransfer } from "../../lresTestUtils/lresTestUtils";
+import {
+  createDataTransfer,
+  flushPromises
+} from "../../lresTestUtils/lresTestUtils";
 
 describe("c-lres-kanban-column", () => {
   afterEach(() => {
@@ -186,6 +189,90 @@ describe("c-lres-kanban-column", () => {
       const body = element.shadowRoot.querySelector(".kanban-column_body");
       expect(body.className).toContain("kanban-column_body");
       expect(body.className).toContain("slds-scrollable_y");
+    });
+  });
+
+  describe("Virtualization", () => {
+    const originalGetBoundingClientRect =
+      Element.prototype.getBoundingClientRect;
+    const originalGetComputedStyle = window.getComputedStyle;
+    const originalRequestAnimationFrame = global.requestAnimationFrame;
+    const originalWindowRequestAnimationFrame = window.requestAnimationFrame;
+
+    afterEach(() => {
+      Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
+      window.getComputedStyle = originalGetComputedStyle;
+      global.requestAnimationFrame = originalRequestAnimationFrame;
+      window.requestAnimationFrame = originalWindowRequestAnimationFrame;
+    });
+
+    it("renders the initial slice before measuring row height", async () => {
+      const records = Array.from({ length: 15 }, (_, index) => ({
+        id: String(index + 1),
+        title: `Card ${index + 1}`,
+        details: []
+      }));
+      const element = buildComponent({
+        column: { key: "A", label: "A", count: 15, records },
+        enableVirtualization: true
+      });
+      await flushPromises();
+
+      const cardElements =
+        element.shadowRoot.querySelectorAll("c-lres-kanban-card");
+      expect(cardElements).toHaveLength(10);
+    });
+
+    it("updates the windowed slice on scroll after measuring height", async () => {
+      Element.prototype.getBoundingClientRect = jest.fn(() => ({
+        height: 20,
+        width: 100,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0
+      }));
+      window.getComputedStyle = jest.fn(() => ({
+        rowGap: "12px",
+        gap: "12px"
+      }));
+      const rafHandler = (callback) => {
+        callback();
+        return 1;
+      };
+      global.requestAnimationFrame = rafHandler;
+      window.requestAnimationFrame = rafHandler;
+
+      const records = Array.from({ length: 30 }, (_, index) => ({
+        id: String(index + 1),
+        title: `Card ${index + 1}`,
+        details: []
+      }));
+      const element = buildComponent({
+        column: { key: "A", label: "A", count: 30, records },
+        enableVirtualization: true
+      });
+      await flushPromises();
+
+      const body = element.shadowRoot.querySelector(".kanban-column_body");
+      Object.defineProperty(body, "clientHeight", {
+        value: 240,
+        configurable: true
+      });
+      await flushPromises();
+
+      const spacers = element.shadowRoot.querySelectorAll(
+        ".kanban-column_spacer"
+      );
+      expect(spacers).toHaveLength(2);
+
+      body.scrollTop = 320;
+      element.column = { ...element.column, records };
+      await flushPromises();
+
+      const cardElements =
+        element.shadowRoot.querySelectorAll("c-lres-kanban-card");
+      expect(cardElements[0].card.id).toBe("6");
     });
   });
 

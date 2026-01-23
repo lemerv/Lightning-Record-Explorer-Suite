@@ -152,6 +152,19 @@ export function buildColumns(records = [], options = {}) {
       lane.entries = lane.entries || [];
       lane.records = lane.records || [];
     }
+    if (!Array.isArray(lane.summaries)) {
+      const { summaries, warnings } = buildLaneSummaries([], {
+        summaryDefinitions,
+        coerceSummaryValue,
+        formatSummaryValue,
+        getSummaryCurrencyCode,
+        columnLabel: lane.label,
+        dateTimeFormat,
+        patternTokenCache
+      });
+      lane.summaries = summaries;
+      lane.summaryWarnings = warnings;
+    }
     orderedKeys.push(laneKey);
     usedKeys.add(laneKey);
   });

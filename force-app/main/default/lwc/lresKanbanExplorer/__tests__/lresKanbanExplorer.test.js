@@ -3,6 +3,12 @@ import KanbanExplorer from "c/lresKanbanExplorer";
 import fetchRelatedCardRecords from "@salesforce/apex/LRES_KanbanCardRecordsController.fetchRelatedCardRecords";
 import fetchParentlessCardRecords from "@salesforce/apex/LRES_KanbanCardRecordsController.fetchParentlessCardRecords";
 import { updateRecord } from "lightning/uiRecordApi";
+import { buildFilterDefinitions as buildFilterDefinitionsInteractions } from "../boardInteractions";
+import {
+  handleSearchInput as handleSearchInputInteractions,
+  handleSortDirectionToggle as handleSortDirectionToggleInteractions,
+  handleFilterOptionToggle as handleFilterOptionToggleInteractions
+} from "../boardInteractions";
 import {
   getObjectInfo,
   getPicklistValuesByRecordType
@@ -66,6 +72,7 @@ describe("c-lres-kanban-explorer", () => {
     const element = createElement("c-lres-kanban-explorer", {
       is: KanbanExplorer
     });
+    element.logDebug = jest.fn();
     element.debugLogging = false;
     element.cardObjectApiName = "Opportunity";
     element.groupingFieldApiName = "Status__c";
@@ -213,8 +220,19 @@ describe("c-lres-kanban-explorer", () => {
 
     const element = buildComponent();
     element.columnSummariesDefinition = "[Amount|SUM|Total]";
+    let rafCallback;
+    const originalRaf = global.requestAnimationFrame;
+    global.requestAnimationFrame = (callback) => {
+      rafCallback = callback;
+      return 1;
+    };
     emitMetadata();
     await settleComponent(4);
+
+    if (typeof rafCallback === "function") {
+      rafCallback();
+      await flushPromises();
+    }
 
     const container = element.shadowRoot.querySelector(
       "c-lres-kanban-board-container"
@@ -222,6 +240,7 @@ describe("c-lres-kanban-explorer", () => {
     expect(container.warningMessage).toContain("multiple currencies");
     const openColumn = container.columns.find((col) => col.key === "Open");
     expect(openColumn.summaries[0].value).toBe("Mixed currencies");
+    global.requestAnimationFrame = originalRaf;
   });
 
   it("builds columns from Apex data and filters by search input", async () => {
@@ -247,11 +266,75 @@ describe("c-lres-kanban-explorer", () => {
         composed: true
       })
     );
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
+    await new Promise((resolve) => setTimeout(resolve, 220));
     await flushPromises();
     const filteredOpen = container.columns.find((col) => col.key === "Open");
     expect(filteredOpen.records).toHaveLength(1);
     const closedColumn = container.columns.find((col) => col.key === "Closed");
     expect(closedColumn.records).toHaveLength(0);
+  });
+
+  it("debounces search input with trailing-only updates", () => {
+    jest.useFakeTimers();
+    const component = {
+      searchValue: "",
+      logDebug: jest.fn(),
+      scheduleRebuildColumnsWithPicklist: jest.fn()
+    };
+
+    handleSearchInputInteractions(component, { detail: { value: "first" } });
+
+    expect(component.searchValue).toBe("");
+    expect(component.scheduleRebuildColumnsWithPicklist).not.toHaveBeenCalled();
+
+    handleSearchInputInteractions(component, { detail: { value: "second" } });
+    expect(component.scheduleRebuildColumnsWithPicklist).not.toHaveBeenCalled();
+
+    jest.advanceTimersByTime(200);
+    expect(component.searchValue).toBe("second");
+    expect(component.scheduleRebuildColumnsWithPicklist).toHaveBeenCalledTimes(
+      1
+    );
+    jest.useRealTimers();
+  });
+
+  it("schedules a rebuild when sort direction toggles", () => {
+    const component = {
+      sortDirection: "asc",
+      logDebug: jest.fn(),
+      scheduleUserRebuildColumnsWithPicklist: jest.fn()
+    };
+
+    handleSortDirectionToggleInteractions(component);
+
+    expect(component.sortDirection).toBe("desc");
+    expect(
+      component.scheduleUserRebuildColumnsWithPicklist
+    ).toHaveBeenCalledTimes(1);
+  });
+
+  it("schedules a rebuild when a filter option toggles", () => {
+    const component = {
+      logDebug: jest.fn(),
+      filterDefinitions: [
+        {
+          id: "Status__c",
+          selectedValues: [],
+          options: [{ value: "Open", selected: false }]
+        }
+      ],
+      scheduleUserRebuildColumnsWithPicklist: jest.fn()
+    };
+
+    handleFilterOptionToggleInteractions(component, {
+      detail: { filterId: "Status__c", value: "Open", checked: true }
+    });
+
+    expect(component.filterDefinitions[0].selectedValues).toEqual(["Open"]);
+    expect(
+      component.scheduleUserRebuildColumnsWithPicklist
+    ).toHaveBeenCalledTimes(1);
   });
 
   it("shows inline error when parent object is set without child relationship", async () => {
@@ -331,6 +414,82 @@ describe("c-lres-kanban-explorer", () => {
       fields: { Id: "001", Status__c: "Closed" }
     });
     expect(fetchRelatedCardRecords.mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("enables virtualization when total cards exceed the threshold", async () => {
+    const manyRecords = Array.from({ length: 120 }, (_, index) =>
+      buildWireRecord({
+        id: `00${index}`,
+        fields: {
+          "Opportunity.Id": { value: `00${index}` },
+          "Opportunity.Status__c": { value: "Open", displayValue: "Open" },
+          "Opportunity.Name": {
+            value: `Deal ${index}`,
+            displayValue: `Deal ${index}`
+          }
+        }
+      })
+    );
+    fetchRelatedCardRecords.mockResolvedValue(manyRecords);
+    const element = buildComponent();
+    element.performanceModeThreshold = 100;
+    emitMetadata();
+    await settleComponent(2);
+
+    const container = element.shadowRoot.querySelector(
+      "c-lres-kanban-board-container"
+    );
+    expect(container.enableVirtualization).toBe(true);
+  });
+
+  it("disables virtualization when the threshold is zero", async () => {
+    fetchRelatedCardRecords.mockResolvedValue(baseApexRecords);
+    const element = buildComponent();
+    element.performanceModeThreshold = 0;
+    emitMetadata();
+    await settleComponent(2);
+
+    const container = element.shadowRoot.querySelector(
+      "c-lres-kanban-board-container"
+    );
+    expect(container.enableVirtualization).toBe(false);
+  });
+
+  it("reverts the optimistic move when the update fails", async () => {
+    fetchRelatedCardRecords.mockResolvedValue(baseApexRecords);
+    const element = buildComponent();
+    emitMetadata();
+    await settleComponent(2);
+
+    const container = element.shadowRoot.querySelector(
+      "c-lres-kanban-board-container"
+    );
+    const initialOpen = container.columns.find((col) => col.key === "Open");
+    const initialClosed = container.columns.find((col) => col.key === "Closed");
+    expect(initialOpen.records).toHaveLength(1);
+    expect(initialClosed.records).toHaveLength(1);
+
+    updateRecord.mockRejectedValue(new Error("update failed"));
+
+    container.dispatchEvent(
+      new CustomEvent("columndrop", {
+        detail: {
+          recordId: "001",
+          sourceColumnKey: "Open",
+          targetColumnKey: "Closed"
+        },
+        bubbles: true,
+        composed: true
+      })
+    );
+    await flushPromises();
+
+    const openColumn = container.columns.find((col) => col.key === "Open");
+    const closedColumn = container.columns.find((col) => col.key === "Closed");
+    expect(openColumn.records).toHaveLength(1);
+    expect(closedColumn.records).toHaveLength(1);
+    expect(openColumn.records.some((card) => card.id === "001")).toBe(true);
+    expect(closedColumn.records.some((card) => card.id === "001")).toBe(false);
   });
 
   it("uses Apex refresh when card where clause is active", async () => {
@@ -460,5 +619,95 @@ describe("c-lres-kanban-explorer", () => {
       clearedFilter.options.every((option) => option.selected === false)
     ).toBe(true);
     expect(clearedFilter.buttonClass).toBe("filter-dropdown_button");
+  });
+
+  it("syncs filter UI state when filters are clean", () => {
+    const component = {
+      logDebug: jest.fn(),
+      filtersDirty: false,
+      isSortMenuOpen: false,
+      activeFilterMenuId: "Missing",
+      filterDefinitions: [
+        {
+          id: "Status__c",
+          field: "Status__c",
+          label: "Status",
+          selectedValues: ["Open", "Stale"],
+          options: [
+            { value: "Open", label: "Open", selected: false },
+            { value: "Closed", label: "Closed", selected: true }
+          ],
+          isOpen: true,
+          buttonClass: "filter-dropdown_button"
+        }
+      ],
+      unregisterMenuOutsideClick: jest.fn()
+    };
+
+    buildFilterDefinitionsInteractions(component, []);
+
+    const syncedFilter = component.filterDefinitions[0];
+    expect(component.activeFilterMenuId).toBeNull();
+    expect(syncedFilter.isOpen).toBe(false);
+    expect(syncedFilter.selectedValues).toEqual(["Open"]);
+    expect(syncedFilter.options).toEqual([
+      { value: "Open", label: "Open", selected: true },
+      { value: "Closed", label: "Closed", selected: false }
+    ]);
+    expect(syncedFilter.buttonClass).toBe(
+      "filter-dropdown_button filter-dropdown_button--active"
+    );
+    expect(component.unregisterMenuOutsideClick).toHaveBeenCalled();
+  });
+
+  it("defers summary calculations and fills placeholders after render", async () => {
+    const records = [
+      buildWireRecord({
+        id: "001",
+        fields: {
+          "Opportunity.Id": { value: "001" },
+          "Opportunity.Status__c": { value: "Open", displayValue: "Open" },
+          "Opportunity.Name": {
+            value: "First Deal",
+            displayValue: "First Deal"
+          },
+          "Opportunity.Amount": { value: 100, displayValue: "100" },
+          "Opportunity.CurrencyIsoCode": {
+            value: "USD",
+            displayValue: "USD"
+          }
+        }
+      })
+    ];
+    fetchRelatedCardRecords.mockResolvedValue(records);
+
+    const element = buildComponent();
+    element.columnSummariesDefinition = "[Amount|SUM|Total]";
+    let rafCallback;
+    const originalRaf = global.requestAnimationFrame;
+    global.requestAnimationFrame = (callback) => {
+      rafCallback = callback;
+      return 1;
+    };
+    emitMetadata();
+    await settleComponent(4);
+
+    const container = element.shadowRoot.querySelector(
+      "c-lres-kanban-board-container"
+    );
+    const openColumn = container.columns.find((col) => col.key === "Open");
+    const placeholder = openColumn.summaries[0];
+    expect(placeholder.isLoading).toBe(true);
+
+    if (typeof rafCallback === "function") {
+      rafCallback();
+      await flushPromises();
+    }
+
+    const updatedColumn = container.columns.find((col) => col.key === "Open");
+    const summary = updatedColumn.summaries[0];
+    expect(summary.isLoading).not.toBe(true);
+    expect(summary.value).toContain("100");
+    global.requestAnimationFrame = originalRaf;
   });
 });

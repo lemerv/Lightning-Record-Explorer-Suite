@@ -3,6 +3,7 @@ import { normalizeBoolean } from "c/lresFieldUtils";
 
 const DEFAULT_BOARD_HEIGHT = 1000;
 const HEADER_BUFFER = 110;
+const DRAG_OVER_THROTTLE_MS = 50;
 
 export default class KanbanBoardContainer extends LightningElement {
   _columns = [];
@@ -12,10 +13,14 @@ export default class KanbanBoardContainer extends LightningElement {
   _warningMessage;
   _showEmptyState = false;
   _boardHeight;
+  _enableVirtualization = false;
+  _cardDisplayConfigKey;
 
-  draggedRecordId = null;
   activeDropColumnKey = null;
   lastDragOverColumnKey = null;
+  _dragOverLastTimestamp = null;
+  _dragOverTimeoutId = null;
+  _pendingDragOverKey = null;
 
   @api
   get columns() {
@@ -76,6 +81,24 @@ export default class KanbanBoardContainer extends LightningElement {
   }
 
   @api
+  get enableVirtualization() {
+    return this._enableVirtualization;
+  }
+
+  set enableVirtualization(value) {
+    this._enableVirtualization = normalizeBoolean(value);
+  }
+
+  @api
+  get cardDisplayConfigKey() {
+    return this._cardDisplayConfigKey;
+  }
+
+  set cardDisplayConfigKey(value) {
+    this._cardDisplayConfigKey = value;
+  }
+
+  @api
   get boardHeight() {
     return this._boardHeight;
   }
@@ -116,12 +139,11 @@ export default class KanbanBoardContainer extends LightningElement {
     if (!recordId) {
       return;
     }
-    this.draggedRecordId = recordId;
     this.lastDragOverColumnKey = columnKey || null;
   }
 
   handleCardDragEnd() {
-    this.draggedRecordId = null;
+    this.resetDragOverThrottle();
     this.lastDragOverColumnKey = null;
     this.activeDropColumnKey = null;
   }
@@ -131,9 +153,7 @@ export default class KanbanBoardContainer extends LightningElement {
       return;
     }
     const columnKey = event.detail?.columnKey || null;
-    if (columnKey !== this.lastDragOverColumnKey) {
-      this.lastDragOverColumnKey = columnKey;
-    }
+    this.throttleDragOver(columnKey);
   }
 
   handleColumnDragEnter(event) {
@@ -144,7 +164,10 @@ export default class KanbanBoardContainer extends LightningElement {
     if (!columnKey) {
       return;
     }
-    this.activeDropColumnKey = columnKey;
+    if (this.activeDropColumnKey !== columnKey) {
+      this.activeDropColumnKey = columnKey;
+    }
+    this.lastDragOverColumnKey = columnKey;
   }
 
   handleColumnDragLeave(event) {
@@ -162,7 +185,7 @@ export default class KanbanBoardContainer extends LightningElement {
     if (!recordId || !targetColumnKey) {
       return;
     }
-    this.draggedRecordId = null;
+    this.resetDragOverThrottle();
     this.lastDragOverColumnKey = null;
     this.activeDropColumnKey = null;
     this.dispatchEvent(
@@ -194,5 +217,62 @@ export default class KanbanBoardContainer extends LightningElement {
         composed: true
       })
     );
+  }
+
+  handleBoardDragLeave(event) {
+    const container = event.currentTarget;
+    const related = event.relatedTarget;
+    const isLeaving = !related || !container || !container.contains(related);
+    if (isLeaving) {
+      this.resetDragOverThrottle();
+      this.activeDropColumnKey = null;
+      this.lastDragOverColumnKey = null;
+    }
+  }
+
+  throttleDragOver(columnKey) {
+    const now = Date.now();
+    const elapsed =
+      this._dragOverLastTimestamp === null
+        ? null
+        : now - this._dragOverLastTimestamp;
+    if (
+      this._dragOverLastTimestamp === null ||
+      elapsed >= DRAG_OVER_THROTTLE_MS
+    ) {
+      this._dragOverLastTimestamp = now;
+      this.applyDragOver(columnKey);
+      return;
+    }
+    this._pendingDragOverKey = columnKey;
+    if (this._dragOverTimeoutId) {
+      return;
+    }
+    const remaining = Math.max(DRAG_OVER_THROTTLE_MS - elapsed, 0);
+    // eslint-disable-next-line @lwc/lwc/no-async-operation
+    this._dragOverTimeoutId = setTimeout(() => {
+      this._dragOverTimeoutId = null;
+      this._dragOverLastTimestamp = Date.now();
+      this.applyDragOver(this._pendingDragOverKey);
+      this._pendingDragOverKey = null;
+    }, remaining);
+  }
+
+  applyDragOver(columnKey) {
+    if (columnKey !== this.lastDragOverColumnKey) {
+      this.lastDragOverColumnKey = columnKey;
+    }
+    if (columnKey && this.activeDropColumnKey !== columnKey) {
+      this.activeDropColumnKey = columnKey;
+    }
+  }
+
+  resetDragOverThrottle() {
+    if (this._dragOverTimeoutId) {
+      clearTimeout(this._dragOverTimeoutId);
+    }
+    this._dragOverLastTimestamp = null;
+    this._dragOverTimeoutId = null;
+    this._pendingDragOverKey = null;
   }
 }

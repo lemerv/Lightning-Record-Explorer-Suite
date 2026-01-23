@@ -1,5 +1,8 @@
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
-import { parseError, showErrorToast as showErrorToastHelper } from "c/lresErrorHandler";
+import {
+  parseError,
+  showErrorToast as showErrorToastHelper
+} from "c/lresErrorHandler";
 import { normalizeString } from "c/lresFieldUtils";
 
 export const DEBUG_PREFIX = "[KanbanExplorer]";
@@ -87,7 +90,7 @@ export function showToast(
   if (mode) {
     detail.mode = mode;
   }
-  component.dispatchEvent(new ShowToastEvent(detail));
+  return component.dispatchEvent(new ShowToastEvent(detail));
 }
 
 export function formatError(component, error) {

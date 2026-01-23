@@ -22,7 +22,7 @@
     </template>
 
     <template if:true={hasColumns}>
-      <div class="kanban slds-scrollable_x">
+      <div class="kanban slds-scrollable_x" ondragleave={handleBoardDragLeave}>
         <template for:each={columns} for:item="column">
           <c-lres-kanban-column
             key={column.key}
@@ -30,8 +30,9 @@
             column-section-style={columnSectionStyle}
             column-body-style={columnBodyStyle}
             show-card-field-labels={showCardFieldLabels}
-            dragged-record-id={draggedRecordId}
             drag-disabled={isLoading}
+            enable-virtualization={enableVirtualization}
+            card-display-config-key={cardDisplayConfigKey}
             active-drop-key={activeDropColumnKey}
             oncolumndragover={handleColumnDragOver}
             oncolumndragenter={handleColumnDragEnter}

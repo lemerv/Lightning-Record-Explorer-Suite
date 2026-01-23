@@ -159,6 +159,12 @@
         description="Java SimpleDateFormat pattern applied to date and datetime fields (for example, dd/MM/yyyy h:mm a). Leave blank to use the running user's Salesforce locale."
       />
             <property
+        name="performanceModeThreshold"
+        type="Integer"
+        label="Performance Mode Threshold"
+        description="Improve performance by rendering only visible cards when total cards exceed this number. Enter a number from 100 upwards. If left blank the default is 200. Enter 0 to disable performance mode."
+      />
+            <property
         name="debugLogging"
         type="Boolean"
         label="Enable Debug Logging"

@@ -122,6 +122,30 @@ describe("c-lres-kanban-explorer integration", () => {
     "Opportunity"
   );
 
+  const movedRecords = buildWireRecordsFromRaw(
+    [
+      {
+        id: "001",
+        fields: {
+          Id: "001",
+          Status__c: "Closed",
+          Name: "Deal 1",
+          Stage__c: "Prospecting"
+        }
+      },
+      {
+        id: "002",
+        fields: {
+          Id: "002",
+          Status__c: "Closed",
+          Name: "Deal 2",
+          Stage__c: "Closed Won"
+        }
+      }
+    ],
+    "Opportunity"
+  );
+
   it("supports end-to-end drag and drop workflow with state sync", async () => {
     fetchRelatedCardRecords.mockResolvedValue(baseRecords);
     const element = buildComponent();
@@ -328,7 +352,9 @@ describe("c-lres-kanban-explorer integration", () => {
   });
 
   it("moves a card into the target column after drag and refresh", async () => {
-    fetchRelatedCardRecords.mockResolvedValue(baseRecords);
+    fetchRelatedCardRecords
+      .mockResolvedValueOnce(baseRecords)
+      .mockResolvedValueOnce(movedRecords);
     const element = buildComponent();
     element.recordId = "001";
     emitMetadata();
@@ -344,7 +370,12 @@ describe("c-lres-kanban-explorer integration", () => {
       container.columns.find((col) => col.key === "Closed").records
     ).toHaveLength(1);
 
-    updateRecord.mockResolvedValue({});
+    let resolveUpdate;
+    updateRecord.mockReturnValue(
+      new Promise((resolve) => {
+        resolveUpdate = resolve;
+      })
+    );
 
     container.dispatchEvent(
       new CustomEvent("columndrop", {
@@ -357,6 +388,18 @@ describe("c-lres-kanban-explorer integration", () => {
         composed: true
       })
     );
+    await flushPromises();
+
+    const openColumn = container.columns.find((col) => col.key === "Open");
+    const closedColumn = container.columns.find((col) => col.key === "Closed");
+    expect(openColumn.records).toHaveLength(0);
+    expect(closedColumn.records).toHaveLength(2);
+    expect(closedColumn.count).toBe(1);
+    const movedCard = closedColumn.records[closedColumn.records.length - 1];
+    expect(movedCard.id).toBe("001");
+    expect(movedCard.isSaving).toBe(true);
+
+    resolveUpdate({});
     await flushPromises();
 
     expect(updateRecord).toHaveBeenCalledWith({

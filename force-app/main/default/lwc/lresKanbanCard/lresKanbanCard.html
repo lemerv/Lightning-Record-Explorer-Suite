@@ -1,61 +1,61 @@
 <template>
-    <article
-        class={cardClass}
-        data-record-id={card.id}
-        data-column-key={columnKey}
-        draggable={isDraggable}
-        ondragstart={handleDragStart}
-        ondragend={handleDragEnd}
-    >
-        <div class="kanban-card_title">
-            <template if:true={titleIcon}>
-                <lightning-icon
-                    class="kanban-field_icon"
-                    icon-name={titleIcon}
-                    size="xx-small"
-                    alternative-text=""
-                ></lightning-icon>
-            </template>
-            <template if:true={titleEmoji}>
-                <span class="kanban-field_emoji" aria-hidden="true">
-                    {titleEmoji}
-                </span>
-            </template>
-            <a
-                class="kanban-card_title-link"
-                href="javascript:void(0);"
-                draggable="false"
-                onclick={handleTitleClick}
-            >
-                {cardTitle}
-            </a>
-            <template if:true={cardId}>
-                <a
-                    class="kanban-card_external-link"
-                    href="javascript:void(0);"
-                    draggable="false"
-                    onclick={handleExternalClick}
-                    aria-label="Open record in new tab"
-                >
-                    <lightning-icon
-                        icon-name="utility:new_window"
-                        size="xx-small"
-                        alternative-text="Open record in new tab"
-                        class="kanban-card_external-icon"
-                    ></lightning-icon>
-                </a>
-            </template>
-        </div>
-        <template if:true={hasDetails}>
-            <div class="kanban-card_details">
-                <template for:each={cardDetails} for:item="detail">
-                    <c-lres-kanban-card-field
-                        key={detail.apiName}
-                        detail={detail}
-                        show-label={showCardFieldLabels}
-                    ></c-lres-kanban-card-field>
-                </template>
-            </div>
+  <article
+    class={cardClass}
+    data-record-id={card.id}
+    data-column-key={columnKey}
+    draggable={isDraggable}
+    ondragstart={handleDragStart}
+    ondragend={handleDragEnd}
+  >
+    <div class="kanban-card_title">
+      <template if:true={titleIcon}>
+        <lightning-icon
+          class="kanban-field_icon"
+          icon-name={titleIcon}
+          size="xx-small"
+          alternative-text=""
+        ></lightning-icon>
+      </template>
+      <template if:true={titleEmoji}>
+        <span class="kanban-field_emoji" aria-hidden="true">
+          {titleEmoji}
+        </span>
+      </template>
+      <a
+        class="kanban-card_title-link"
+        href="javascript:void(0);"
+        draggable="false"
+        onclick={handleTitleClick}
+      >
+        {cardTitle}
+      </a>
+      <template if:true={cardId}>
+        <a
+          class="kanban-card_external-link"
+          href="javascript:void(0);"
+          draggable="false"
+          onclick={handleExternalClick}
+          aria-label="Open record in new tab"
+        >
+          <lightning-icon
+            icon-name="utility:new_window"
+            size="xx-small"
+            alternative-text="Open record in new tab"
+            class="kanban-card_external-icon"
+          ></lightning-icon>
+        </a>
+      </template>
+    </div>
+    <template if:true={hasDetails}>
+      <div class="kanban-card_details">
+        <template for:each={cardDetails} for:item="detail">
+          <c-lres-kanban-card-field
+            key={detail.apiName}
+            detail={detail}
+            show-label={showCardFieldLabels}
+          ></c-lres-kanban-card-field>
         </template>
-    </article>
+      </div>
+    </template>
+  </article>
 </template>

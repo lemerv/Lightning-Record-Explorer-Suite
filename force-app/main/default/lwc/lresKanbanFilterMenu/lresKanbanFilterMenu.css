@@ -1,92 +1,95 @@
 :host {
-    display: contents;
+  display: contents;
 }
 
 .filter-control {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
 }
 
 .filter-dropdown {
-    position: relative;
+  position: relative;
 }
 
 .filter-dropdown_button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    border-radius: 999px;
-    border: var(--lwc-borderWidthThin, 1px) solid var(--lwc-colorBorderInput, #c9c9c9);
-    background: #ffffff;
-    color: var(--lwc-colorTextInput, #080707);
-    padding: 0.35rem 0.85rem;
-    cursor: pointer;
-    box-shadow: var(--lwc-shadowButtonInset, inset 0 0 0 0 rgba(0, 0, 0, 0));
-    transition: border 0.1s ease, box-shadow 0.1s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 999px;
+  border: var(--lwc-borderWidthThin, 1px) solid
+    var(--lwc-colorBorderInput, #c9c9c9);
+  background: #ffffff;
+  color: var(--lwc-colorTextInput, #080707);
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  box-shadow: var(--lwc-shadowButtonInset, inset 0 0 0 0 rgba(0, 0, 0, 0));
+  transition:
+    border 0.1s ease,
+    box-shadow 0.1s ease;
 }
 
 .filter-dropdown_button lightning-icon {
-    --slds-c-icon-color-foreground: var(--lwc-colorTextInputIcon, #5f5f5f);
+  --slds-c-icon-color-foreground: var(--lwc-colorTextInputIcon, #5f5f5f);
 }
 
 .filter-dropdown_button:hover,
 .filter-dropdown_button:focus {
-    border-color: var(--lwc-brandTextLink, #0b5cab);
-    box-shadow: 0 0 0 1px var(--lwc-brandTextLink, #0b5cab);
+  border-color: var(--lwc-brandTextLink, #0b5cab);
+  box-shadow: 0 0 0 1px var(--lwc-brandTextLink, #0b5cab);
 }
 
 .filter-dropdown_button--active {
-    border-color: #1b96ff;
-    background: #e6f2ff;
-    color: #0b5cab;
-    box-shadow: 0 0 0 1px rgba(27, 150, 255, 0.25);
+  border-color: #1b96ff;
+  background: #e6f2ff;
+  color: #0b5cab;
+  box-shadow: 0 0 0 1px rgba(27, 150, 255, 0.25);
 }
 
 .filter-dropdown_button--active lightning-icon {
-    --slds-c-icon-color-foreground: #0b5cab;
+  --slds-c-icon-color-foreground: #0b5cab;
 }
 
 .filter-dropdown_button--active .filter-dropdown_label {
-    color: #0b5cab;
+  color: #0b5cab;
 }
 
 .filter-dropdown_label {
-    font-weight: 600;
-    font-size: 0.75rem;
+  font-weight: 600;
+  font-size: 0.75rem;
 }
 
 .filter-menu {
-    position: absolute;
-    min-width: 12rem;
-    margin-top: 0.25rem;
-    right: 0;
-    z-index: 10;
-    max-height: 16rem;
-    overflow-y: auto;
+  position: absolute;
+  min-width: 12rem;
+  margin-top: 0.25rem;
+  right: 0;
+  z-index: 10;
+  max-height: 16rem;
+  overflow-y: auto;
 }
 
 .filter-menu_list {
-    list-style: none;
-    margin: 0;
-    padding: 0.25rem 0;
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
 }
 
 .filter-menu_item {
-    padding: 0 0.75rem;
+  padding: 0 0.75rem;
 }
 
 .filter-menu_checkbox {
-    display: block;
-    padding: 0.25rem 0;
+  display: block;
+  padding: 0.25rem 0;
 }
 
 .filter-menu_checkbox .slds-form-element__control {
-    margin-top: 0;
+  margin-top: 0;
 }
 
 .filter-menu_checkbox .slds-form-element__label {
-    font-size: 0.75rem;
-    font-weight: 400;
+  font-size: 0.75rem;
+  font-weight: 400;
 }

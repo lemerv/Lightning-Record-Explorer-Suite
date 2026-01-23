@@ -3,6 +3,7 @@ jest.mock("@salesforce/i18n/currency", () => ({ default: "USD" }), {
 });
 
 import {
+  extractFieldData,
   formatFieldDisplayValue,
   getFieldLabel,
   qualifyFieldName
@@ -88,5 +89,38 @@ describe("fieldDisplayUtils.formatFieldDisplayValue", () => {
       {}
     );
     expect(result).toBe("$10,000.00");
+  });
+});
+
+describe("fieldDisplayUtils.extractFieldData", () => {
+  it("serves cached values when present and falls back when cache is absent", () => {
+    const component = {
+      cardObjectApiName: "Opportunity",
+      objectInfo: { fields: { Name: { dataType: "String" } } },
+      effectiveDateTimeFormat: null,
+      patternTokenCache: new Map(),
+      _fieldDataCache: new Map()
+    };
+    const record = {
+      id: "001",
+      fields: {
+        "Opportunity.Name": {
+          value: "First Deal",
+          displayValue: "First Deal"
+        }
+      }
+    };
+
+    const initial = extractFieldData(component, record, "Opportunity.Name");
+    record.fields["Opportunity.Name"].value = "Updated Deal";
+    record.fields["Opportunity.Name"].displayValue = "Updated Deal";
+
+    const cached = extractFieldData(component, record, "Opportunity.Name");
+    expect(cached.display).toBe(initial.display);
+    expect(cached.display).toBe("First Deal");
+
+    component._fieldDataCache = null;
+    const fresh = extractFieldData(component, record, "Opportunity.Name");
+    expect(fresh.display).toBe("Updated Deal");
   });
 });
