@@ -11,11 +11,6 @@
     "FieldAuditTrail"
   ],
   "settings": {
-    "userSettings": {
-      "language": "en_US",
-      "locale": "en_AU",
-      "timeZone": "Australia/Sydney"
-    },
     "communitiesSettings": {
       "enableNetworksEnabled": true
     },
