@@ -1,17 +1,15 @@
-# Kanban Explorer
+# Salesforce Kanban Explorer
 
-The powerful kanban board component for Salesforce that brings true kanban functionality to your org.
+A free Salesforce kanban component for Salesforce. Highly customisable, highly performant, and fun to use. Use it in App, Home, and record pages.
 
-![Kanban Explorer in parent mode with multi-select enabled](docs/images/Case-Parent-Multi-Board.png)
+![Salesforce Kanban Explorer in parent mode with multi-select enabled](docs/images/Case-Parent-Multi-Board.png)
 
-## What is Kanban Explorer?
+## What is Salesforce Kanban Explorer?
 
 ![GitHub License](https://img.shields.io/github/license/lemerv/Salesforce-Kanban-Explorer?style=for-the-badge&color=blue)
-  ![GitHub Repo stars](https://img.shields.io/github/stars/lemerv/Salesforce-Kanban-Explorer?style=for-the-badge&logo=github&color=yellow)
+![GitHub Repo stars](https://img.shields.io/github/stars/lemerv/Salesforce-Kanban-Explorer?style=for-the-badge&logo=github&color=yellow)
 
-
-
-Kanban Explorer is a Lightning Web Component that transforms your Salesforce records into interactive kanban boards.
+Salesforce Kanban Explorer is a Lightning Web Component that transforms your Salesforce records into interactive kanban boards.
 
 🚀 **Key Features**
 
@@ -38,7 +36,7 @@ Kanban Explorer is a Lightning Web Component that transforms your Salesforce rec
 
 ## Typical Use Cases
 
-Kanban Explorer is adaptable:
+Salesforce Kanban Explorer is adaptable:
 
 - **Service** - Case management by status, priority, or team
 - **Sales** - Opportunity pipeline tracking through sales stages
@@ -89,7 +87,7 @@ If you encounter issues, have questions, find a bug, or want to request a featur
 - **Salesforce Platform**: Compatible with Lightning Experience
 - **Permissions**: Simply assign the `LRES_Access` permission set to users
 
-![Kanban Explorer for Cases](docs/images/Cases-Parentless-Board.png)
+![Salesforce Kanban Explorer for Cases](docs/images/Cases-Parentless-Board.png)
 
 ![Parent selection mode and search](docs/images/Parent-Multi-Search.png)
 
