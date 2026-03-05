@@ -6,7 +6,7 @@ A free Salesforce kanban component for Salesforce. Highly customisable, highly p
 
 ## What is Salesforce Kanban Explorer?
 
-![GitHub License](https://img.shields.io/github/license/lemerv/Salesforce-Kanban-Explorer?style=for-the-badge&color=blue)
+![GitHub License](https://img.shields.io/github/license/lemerv/salesforce-kanban-explorer?style=for-the-badge&color=blue)
 ![GitHub Repo stars](https://img.shields.io/github/stars/lemerv/Salesforce-Kanban-Explorer?style=for-the-badge&logo=github&color=yellow)
 
 Salesforce Kanban Explorer is a Lightning Web Component that transforms your Salesforce records into interactive kanban boards.
